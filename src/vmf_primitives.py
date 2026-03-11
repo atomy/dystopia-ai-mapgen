@@ -12,6 +12,11 @@ if TYPE_CHECKING:
     from vmf_writer import VmfWriter
 
 
+DEFAULT_FLOOR_MATERIAL = "urban/conc_clean2"
+DEFAULT_WALL_MATERIAL = "vaccinecore/metal_panelwall_001"
+DEFAULT_ROOF_MATERIAL = "vaccine/dys_metalroof"
+
+
 def add_box(
     writer: VmfWriter,
     x: float,
@@ -20,7 +25,7 @@ def add_box(
     width: float,
     depth: float,
     height: float,
-    material: str = "DEV/DEV_MEASUREGENERIC01",
+    material: str = DEFAULT_WALL_MATERIAL,
     face_materials: Sequence[str] | None = None,
 ) -> None:
     """
@@ -54,7 +59,7 @@ def add_room(
     width: float,
     depth: float,
     height: float,
-    floor_material: str = "DEV/DEV_MEASUREGENERIC01",
+    floor_material: str = DEFAULT_FLOOR_MATERIAL,
     wall_material: str | None = None,
     ceiling_material: str | None = None,
 ) -> None:
@@ -71,7 +76,7 @@ def add_corridor(
     length: float,
     width: float,
     height: float,
-    material: str = "DEV/DEV_MEASUREGENERIC01",
+    material: str = DEFAULT_WALL_MATERIAL,
 ) -> None:
     """Corridor along X (length = X extent)."""
     add_box(writer, x, y, z, length, width, height, material)
@@ -85,7 +90,7 @@ def add_street_trench(
     length: float,
     width: float,
     depth: float = 0,
-    material: str = "DEV/DEV_MEASUREGENERIC01",
+    material: str = DEFAULT_FLOOR_MATERIAL,
 ) -> None:
     """Street as a flat box (floor). depth=0 means no vertical extent; use small thickness for valid brush."""
     h = 16 if depth == 0 else depth
@@ -100,7 +105,7 @@ def add_rooftop_platform(
     width: float,
     depth: float,
     thickness: float = 32,
-    material: str = "DEV/DEV_MEASUREGENERIC01",
+    material: str = DEFAULT_ROOF_MATERIAL,
 ) -> None:
     """Rooftop as a thin box."""
     add_box(writer, x, y, z, width, depth, thickness, material)

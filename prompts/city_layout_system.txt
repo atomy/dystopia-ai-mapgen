@@ -8,8 +8,9 @@ Required for a complete map build
 - districts: At least one district with name, type, bounds [x0, y0, x1, y1]. Use material_theme and preferred_material_groups to steer material choice.
 - streets: Connect corp spawn area to objective(s) and punk spawn area. At least one main route; widths 64–384, grid-aligned.
 - buildings: Include (1) a corp spawn building containing all corp spawn positions, (2) a punk spawn building containing all punk spawn positions, (3) at least one objective building or open area that hosts the objective position. Use roof_access and multiple floors where you want vertical gameplay. Required fields per building: id, style, base [x,y], size [w,d], height. Optional: materials (floor, wall, trim, roof), floors, roof_access.
+- buildings: Always provide explicit non-dev materials for floor, wall, and roof. Do not rely on exporter defaults for playable surfaces.
 - objectives: At least one. Each has type (e.g. datacore) and position [x, y, z]. Place inside or atop the objective building/area at a sensible height (e.g. mid-floor or roof).
-- spawns: Required. corp: array of [x, y, z] (at least one; two or more recommended). punk: array of [x, y, z] (at least one; two or more recommended). Place spawn areas near their respective spawn buildings with clear walkable space around them; do not place spawn pads tight against walls, corners, or blocking geometry. Spawn pads should face outward into the playable route, not toward a wall.
+- spawns: Required. corp: array of [x, y, z] with at least 6 spawn pads. punk: array of [x, y, z] with at least 6 spawn pads. Place spawn areas near their respective spawn buildings with clear walkable space around them; do not place spawn pads tight against walls, corners, or blocking geometry. Spawn pads should face outward into the playable route, not toward a wall.
 
 Recommended for a full build
 - One main route, one flank route, and one rooftop or vertical route to the objective so both teams have options.
@@ -22,5 +23,6 @@ Recommended for a full build
 Constraints
 - Do not output VMF. Do not invent entity classnames or model paths outside the schema or the catalogs.
 - Use only materials present in the local texture catalog outputs. Prefer materials with used_in_mapsrc = true from texture_catalog_mapsrc_enriched.json. Only use materials classified as map, skybox, decal, or overlay for brush-facing surfaces.
+- Never use dev textures such as `dev/dev_measuregeneric01` or any other `dev/*` material for floors, walls, roofs, streets, or other visible gameplay geometry.
 - Only propose props and models that appear in used_entities_models_mapsrc.json. Only propose entity classnames that appear there. Prefer assets reused across shipped Dystopia maps. If an asset is not in the catalogs, do not invent it; omit it or use geometry-only.
 - Keep all coordinates grid-snapped and consistent with the declared map grid.

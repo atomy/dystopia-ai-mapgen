@@ -17,9 +17,9 @@ from dystopia_entities import (
 from spawn_layout import FLOOR_THICKNESS, FLOOR_Z, SPAWN_FLOOR_Z, resolve_spawn_positions
 
 
-MAT_FLOOR = "DEV/DEV_MEASUREGENERIC01"
-MAT_WALL = "DEV/DEV_MEASUREGENERIC01"
-MAT_ROOF = "DEV/DEV_MEASUREGENERIC01"
+MAT_FLOOR = "urban/conc_clean2"
+MAT_WALL = "vaccinecore/metal_panelwall_001"
+MAT_ROOF = "vaccine/dys_metalroof"
 SKY_MATERIAL = "TOOLS/TOOLSSKYBOX"
 SKY_WALL_HEIGHT = 1152
 SKY_THICKNESS = 64

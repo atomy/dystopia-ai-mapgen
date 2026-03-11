@@ -1,15 +1,14 @@
 ---
 description: Use .bat entrypoints for dystopia_citygen; do not run .py scripts directly
-globs: dystopia_citygen/**
-alwaysApply: false
+alwaysApply: true
 ---
 
 # dystopia_citygen: use .bat scripts only
 
-When running or suggesting commands for the **dystopia_citygen** project:
+When running or suggesting commands for the `dystopia_citygen` project:
 
-- **Always use the `.bat` wrappers**, not the `.py` scripts. This allows execution to be allowed in Cursor without running Python directly.
-- **From the maps folder:** run `dystopia_citygen\run_generator.bat` (with options like `--use-llm-layout`, `--compile`).
-- **From dystopia_citygen:** run `prepare_llm_request.bat`, `catalog_textures.bat`, `catalog_used_textures.bat`, `generate_layout.bat`, or `compile_map.bat` as needed.
+- Always use the `.bat` wrappers, not the `.py` scripts.
+- Prefer `run_generator.bat`, `prepare_llm_request.bat`, `catalog_textures.bat`, `catalog_used_textures.bat`, `generate_layout.bat`, and `compile_map.bat` as the project entrypoints.
+- Only touch the `.py` files when editing implementation, not when choosing how to run project tasks.
 
-Do **not** suggest or use `python .../*.py` for these entrypoints; use the corresponding `.bat` file instead.
+Do not suggest or use `python .../*.py` for these entrypoints; use the corresponding `.bat` file instead.

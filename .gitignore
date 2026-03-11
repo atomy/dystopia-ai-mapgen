@@ -2,3 +2,7 @@ __pycache__/
 *.py[cod]
 *.pyo
 *.pyd
+*.bsp
+*.log
+*.prt
+*.vmf

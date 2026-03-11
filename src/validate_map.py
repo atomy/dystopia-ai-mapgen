@@ -15,6 +15,7 @@ from spawn_layout import FLOOR_THICKNESS, FLOOR_Z, SPAWN_FLOOR_Z, resolve_spawn_
 
 REQUIRED_TOP_LEVEL = ["versioninfo", "visgroups", "viewsettings", "world", "cameras", "cordon"]
 SCENE_BOUNDS_PADDING = 256  # Keep in sync with scene_to_vmf.ARENA_PADDING.
+MIN_TEAM_SPAWNS = 6
 DEFAULT_PROP_SPAWN_PADDING = 96
 DEFAULT_PROP_SPAWN_MAX_DELTA_Z = 96
 PURPOSE_SPAWN_PADDING = 192
@@ -150,6 +151,18 @@ def _scene_reference_bounds(scene: Scene) -> tuple[int, int, int, int]:
 def validate_scene_layout(scene: Scene) -> list[str]:
     """Validate layout-level placement constraints before exporting a VMF."""
     errors: list[str] = []
+
+    if len(scene.spawns.corp) < MIN_TEAM_SPAWNS:
+        errors.append(
+            f"Corp team must define at least {MIN_TEAM_SPAWNS} spawn pads "
+            f"(found {len(scene.spawns.corp)})"
+        )
+    if len(scene.spawns.punk) < MIN_TEAM_SPAWNS:
+        errors.append(
+            f"Punk team must define at least {MIN_TEAM_SPAWNS} spawn pads "
+            f"(found {len(scene.spawns.punk)})"
+        )
+
     arena_x_min, arena_y_min, arena_x_max, arena_y_max = _scene_reference_bounds(scene)
     arena_bounds = (arena_x_min, arena_y_min, arena_x_max, arena_y_max)
     building_boxes = [(b.base, b.size) for b in scene.buildings if b.height > 0]

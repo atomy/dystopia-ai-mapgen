@@ -24,7 +24,24 @@ def _base_scene(*props: PropPlacement) -> Scene:
         streets=[Street(name="main", path=[(-1024, 0), (1024, 0)], width=256)],
         buildings=[],
         objectives=[Objective(type="datacore", position=(0, 0, 128))],
-        spawns=Spawns(corp=[(-768, 0, -64)], punk=[(768, 0, -64)]),
+        spawns=Spawns(
+            corp=[
+                (-768, -320, -64),
+                (-768, -192, -64),
+                (-768, -64, -64),
+                (-768, 64, -64),
+                (-768, 192, -64),
+                (-768, 320, -64),
+            ],
+            punk=[
+                (768, -320, -64),
+                (768, -192, -64),
+                (768, -64, -64),
+                (768, 64, -64),
+                (768, 192, -64),
+                (768, 320, -64),
+            ],
+        ),
         props=list(props),
         entities=[],
     )
@@ -125,3 +142,16 @@ def test_blocks_vending_machine_inside_generated_platform() -> None:
     )
     errors = validate_scene_layout(scene)
     assert any("inside solid building" in error for error in errors), errors
+
+
+def test_requires_six_spawn_pads_per_team() -> None:
+    scene = _base_scene()
+    scene.spawns = Spawns(
+        corp=[(-768, -64, -64)] * 5,
+        punk=[(768, -64, -64)] * 5,
+    )
+
+    errors = validate_scene_layout(scene)
+
+    assert any("Corp team must define at least 6 spawn pads" in error for error in errors), errors
+    assert any("Punk team must define at least 6 spawn pads" in error for error in errors), errors

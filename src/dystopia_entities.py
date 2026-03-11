@@ -84,7 +84,7 @@ def add_dys_jackpoint(
         sides.append({
             "id": side_id,
             "plane": _plane_string(p1, p2, p3),
-            "material": "TOOLS/TOOLSNODRAW" if i != 3 else "DEV/DEV_MEASUREGENERIC01",
+            "material": "TOOLS/TOOLSNODRAW" if i != 3 else "urban/conc_clean2",
             "uaxis": uaxis,
             "vaxis": vaxis,
             "rotation": "0",

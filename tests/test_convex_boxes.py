@@ -42,7 +42,7 @@ def test_box_supports_per_face_materials() -> None:
     w = VmfWriter()
     face_materials = [
         "TOOLS/TOOLSSKYBOX",
-        "DEV/DEV_MEASUREGENERIC01",
+        "urban/conc_clean2",
         "BRICK/WALL_A",
         "BRICK/WALL_B",
         "BRICK/WALL_C",
