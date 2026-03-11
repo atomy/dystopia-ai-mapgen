@@ -9,7 +9,7 @@ attached), then save the model output as output/layout.json and run the
 generator with --layout-json or --use-llm-layout.
 
 Build chain (LLM layout):
-  1. Run: python prepare_llm_request.py
+  1. Run: prepare_llm_request.bat
   2. Open output/llm_layout_request.md (and attach output/*.json catalogs in Cursor)
   3. Run the LLM; save response as output/layout.json
   4. From maps folder: run_generator.bat --use-llm-layout [--compile]

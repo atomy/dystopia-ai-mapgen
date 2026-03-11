@@ -3,9 +3,9 @@
 Entrypoint: generate map layout (LLM JSON or static MVP), export to VMF, and optionally compile.
 
 Build chain (LLM layout):
-  1. Run prepare_llm_request.py; open output/llm_layout_request.md and catalogs in Cursor.
+  1. Run prepare_llm_request.bat; open output/llm_layout_request.md and catalogs in Cursor.
   2. Run the LLM; save response as output/layout.json.
-  3. Run this script with --use-llm-layout (or --layout-json path) from the maps folder.
+  3. Run run_generator.bat with --use-llm-layout (or --layout-json path) from the maps folder.
 
 Fallback (static map): run without --layout-json and without --use-llm-layout,
 or with --use-llm-layout when output/layout.json is missing; uses hardcoded MVP arena.

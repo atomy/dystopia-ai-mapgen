@@ -1,0 +1,447 @@
+{
+  "map_name": "dys_gpt_54",
+  "grid": 128,
+  "districts": [
+    {
+      "name": "corp_arcology",
+      "type": "corporate",
+      "bounds": [-2304, -1536, -640, 1536],
+      "material_theme": "clean_corporate",
+      "preferred_material_groups": ["urban", "twincannon", "vaccinecore"]
+    },
+    {
+      "name": "central_exchange",
+      "type": "datacore",
+      "bounds": [-640, -1152, 640, 1152],
+      "material_theme": "neon_exchange",
+      "preferred_material_groups": ["twincannon", "broadcast", "adverts"]
+    },
+    {
+      "name": "punk_foundry",
+      "type": "industrial",
+      "bounds": [640, -1536, 2304, 1536],
+      "material_theme": "industrial",
+      "preferred_material_groups": ["urban", "vaccine", "vaccinecore"]
+    }
+  ],
+  "streets": [
+    {
+      "name": "main_boulevard",
+      "path": [[-1920, 0], [-640, 0], [0, 0], [640, 0], [1920, 0]],
+      "width": 384
+    },
+    {
+      "name": "north_rise",
+      "path": [[-1664, 640], [-896, 896], [0, 1024], [896, 896], [1664, 640]],
+      "width": 256
+    },
+    {
+      "name": "south_service",
+      "path": [[-1664, -640], [-896, -896], [0, -1024], [896, -896], [1664, -640]],
+      "width": 256
+    },
+    {
+      "name": "center_spine",
+      "path": [[0, -1152], [0, 0], [0, 1152]],
+      "width": 192
+    }
+  ],
+  "buildings": [
+    {
+      "id": "corp_spawn_hall",
+      "style": "block",
+      "base": [-2176, -384],
+      "size": [512, 768],
+      "height": 256,
+      "floors": 2,
+      "roof_access": true,
+      "materials": {
+        "floor": "urban/conc_clean2",
+        "wall": "twincannon/dys_office/office_wall2",
+        "roof": "vaccine/dys_metalroof"
+      }
+    },
+    {
+      "id": "corp_upper_node",
+      "style": "tower",
+      "base": [-1792, 768],
+      "size": [512, 384],
+      "height": 384,
+      "floors": 3,
+      "roof_access": true,
+      "materials": {
+        "floor": "urban/conc_clean2",
+        "wall": "vaccinecore/metal_panelwall_001",
+        "roof": "twincannon/cube_white"
+      }
+    },
+    {
+      "id": "corp_lower_node",
+      "style": "block",
+      "base": [-1792, -1152],
+      "size": [640, 384],
+      "height": 384,
+      "floors": 3,
+      "roof_access": true,
+      "materials": {
+        "floor": "urban/conc_clean2",
+        "wall": "dys_fortress/dys_fortress-vaccine-detail3base",
+        "roof": "vaccine/dys_metalroof"
+      }
+    },
+    {
+      "id": "corp_mid_terrace",
+      "style": "platform",
+      "base": [-1024, 256],
+      "size": [256, 384],
+      "height": 128,
+      "floors": 1,
+      "roof_access": true,
+      "materials": {
+        "floor": "twincannon/concretefloor009a_fixed",
+        "wall": "twincannon/brushblockmetal",
+        "roof": "twincannon/cube_white"
+      }
+    },
+    {
+      "id": "corp_lower_barricade",
+      "style": "platform",
+      "base": [-1152, -640],
+      "size": [384, 128],
+      "height": 128,
+      "floors": 1,
+      "roof_access": false,
+      "materials": {
+        "floor": "twincannon/concretefloor009a_fixed",
+        "wall": "dys_fortress/dys_fortress-vaccine-detail6base",
+        "roof": "twincannon/cube_white"
+      }
+    },
+    {
+      "id": "objective_podium",
+      "style": "plaza",
+      "base": [-256, -256],
+      "size": [512, 512],
+      "height": 128,
+      "floors": 1,
+      "roof_access": true,
+      "materials": {
+        "floor": "twincannon/concretefloor009a_fixed",
+        "wall": "dys_fortress/dys_fortress-vaccine-detail6base",
+        "roof": "twincannon/cube_white"
+      }
+    },
+    {
+      "id": "north_data_wall",
+      "style": "screen",
+      "base": [-128, 384],
+      "size": [256, 128],
+      "height": 256,
+      "floors": 1,
+      "roof_access": false,
+      "materials": {
+        "floor": "urban/conc_clean2",
+        "wall": "broadcast/screens/firewall",
+        "roof": "twincannon/cube_white"
+      }
+    },
+    {
+      "id": "south_data_wall",
+      "style": "screen",
+      "base": [-128, -512],
+      "size": [256, 128],
+      "height": 256,
+      "floors": 1,
+      "roof_access": false,
+      "materials": {
+        "floor": "urban/conc_clean2",
+        "wall": "broadcast/screens/txscroll",
+        "roof": "twincannon/cube_white"
+      }
+    },
+    {
+      "id": "west_ad_kiosk",
+      "style": "kiosk",
+      "base": [-512, -128],
+      "size": [128, 256],
+      "height": 192,
+      "floors": 1,
+      "roof_access": false,
+      "materials": {
+        "floor": "urban/conc_clean2",
+        "wall": "adverts/adverts_cyberfight_001",
+        "roof": "twincannon/cube_white"
+      }
+    },
+    {
+      "id": "east_ad_kiosk",
+      "style": "kiosk",
+      "base": [384, -128],
+      "size": [128, 256],
+      "height": 192,
+      "floors": 1,
+      "roof_access": false,
+      "materials": {
+        "floor": "urban/conc_clean2",
+        "wall": "adverts/adverts_laora_001",
+        "roof": "twincannon/cube_white"
+      }
+    },
+    {
+      "id": "north_bridge_west",
+      "style": "platform",
+      "base": [-896, 896],
+      "size": [512, 256],
+      "height": 256,
+      "floors": 1,
+      "roof_access": true,
+      "materials": {
+        "floor": "twincannon/concretefloor009a_fixed",
+        "wall": "broadcast/screens/scanline1",
+        "roof": "twincannon/cube_white"
+      }
+    },
+    {
+      "id": "north_bridge_east",
+      "style": "platform",
+      "base": [384, 896],
+      "size": [512, 256],
+      "height": 256,
+      "floors": 1,
+      "roof_access": true,
+      "materials": {
+        "floor": "twincannon/concretefloor009a_fixed",
+        "wall": "broadcast/screens/scanline2",
+        "roof": "twincannon/cube_white"
+      }
+    },
+    {
+      "id": "south_bridge_west",
+      "style": "platform",
+      "base": [-896, -1152],
+      "size": [512, 256],
+      "height": 192,
+      "floors": 1,
+      "roof_access": true,
+      "materials": {
+        "floor": "twincannon/concretefloor009a_fixed",
+        "wall": "twincannon/cube_green2dark",
+        "roof": "twincannon/cube_white"
+      }
+    },
+    {
+      "id": "south_bridge_east",
+      "style": "platform",
+      "base": [384, -1152],
+      "size": [512, 256],
+      "height": 192,
+      "floors": 1,
+      "roof_access": true,
+      "materials": {
+        "floor": "twincannon/concretefloor009a_fixed",
+        "wall": "twincannon/cube_green3",
+        "roof": "twincannon/cube_white"
+      }
+    },
+    {
+      "id": "punk_mid_terrace",
+      "style": "platform",
+      "base": [768, 256],
+      "size": [256, 384],
+      "height": 128,
+      "floors": 1,
+      "roof_access": true,
+      "materials": {
+        "floor": "twincannon/concretefloor009a_fixed",
+        "wall": "twincannon/brushblockmetal",
+        "roof": "twincannon/cube_white"
+      }
+    },
+    {
+      "id": "punk_lower_barricade",
+      "style": "platform",
+      "base": [768, -640],
+      "size": [384, 128],
+      "height": 128,
+      "floors": 1,
+      "roof_access": false,
+      "materials": {
+        "floor": "twincannon/concretefloor009a_fixed",
+        "wall": "dys_fortress/dys_fortress-vaccine-detail1base",
+        "roof": "twincannon/cube_white"
+      }
+    },
+    {
+      "id": "punk_upper_pipeworks",
+      "style": "tower",
+      "base": [1280, 768],
+      "size": [512, 384],
+      "height": 384,
+      "floors": 3,
+      "roof_access": true,
+      "materials": {
+        "floor": "urban/conc_clean2",
+        "wall": "vaccinecore/metal_panelwall_001",
+        "roof": "twincannon/cube_white"
+      }
+    },
+    {
+      "id": "punk_lower_market",
+      "style": "block",
+      "base": [1152, -1152],
+      "size": [640, 384],
+      "height": 384,
+      "floors": 3,
+      "roof_access": true,
+      "materials": {
+        "floor": "urban/conc_clean2",
+        "wall": "dys_fortress/dys_fortress-vaccine-detail1base",
+        "roof": "vaccine/dys_metalroof"
+      }
+    },
+    {
+      "id": "punk_spawn_foundry",
+      "style": "block",
+      "base": [1664, -384],
+      "size": [512, 768],
+      "height": 256,
+      "floors": 2,
+      "roof_access": true,
+      "materials": {
+        "floor": "urban/conc_clean2",
+        "wall": "urban/dys_urban_chipboard_04",
+        "roof": "vaccine/dys_metalroof"
+      }
+    }
+  ],
+  "objectives": [
+    {
+      "type": "datacore",
+      "position": [0, 0, 96]
+    }
+  ],
+  "spawns": {
+    "corp": [[-1536, 0, -64], [-1536, 256, -64], [-1536, -256, -64]],
+    "punk": [[1536, 0, -64], [1536, 256, -64], [1536, -256, -64]]
+  },
+  "props": [
+    {
+      "id": "corp_light_north",
+      "model": "models/props/light01_fixed.mdl",
+      "origin": [-1664, 512, 96],
+      "angles": [0, 0, 0],
+      "zone": "corp_arcology",
+      "purpose": "spawn_lighting"
+    },
+    {
+      "id": "corp_light_south",
+      "model": "models/props/light01_fixed.mdl",
+      "origin": [-1664, -512, 96],
+      "angles": [0, 0, 0],
+      "zone": "corp_arcology",
+      "purpose": "spawn_lighting"
+    },
+    {
+      "id": "punk_light_north",
+      "model": "models/props/light01_fixed.mdl",
+      "origin": [1664, 512, 96],
+      "angles": [0, 180, 0],
+      "zone": "punk_foundry",
+      "purpose": "spawn_lighting"
+    },
+    {
+      "id": "punk_light_south",
+      "model": "models/props/light01_fixed.mdl",
+      "origin": [1664, -512, 96],
+      "angles": [0, 180, 0],
+      "zone": "punk_foundry",
+      "purpose": "spawn_lighting"
+    },
+    {
+      "id": "corp_vending",
+      "model": "models/props/dys_vendingmachine01c.mdl",
+      "origin": [-768, 0, -32],
+      "angles": [0, 90, 0],
+      "zone": "corp_arcology",
+      "purpose": "landmark"
+    },
+    {
+      "id": "punk_vending",
+      "model": "models/props/dys_vendingmachine01c.mdl",
+      "origin": [768, 0, -32],
+      "angles": [0, 270, 0],
+      "zone": "punk_foundry",
+      "purpose": "landmark"
+    },
+    {
+      "id": "west_jackin",
+      "model": "models/props/prop_jackin_dtrust.mdl",
+      "origin": [-512, 0, -32],
+      "angles": [0, 90, 0],
+      "zone": "central_exchange",
+      "purpose": "cyberspace_landmark"
+    },
+    {
+      "id": "east_jackin",
+      "model": "models/props/prop_jackin_punks.mdl",
+      "origin": [512, 0, -32],
+      "angles": [0, 270, 0],
+      "zone": "central_exchange",
+      "purpose": "cyberspace_landmark"
+    },
+    {
+      "id": "north_monitor",
+      "model": "models/props/monitor01.mdl",
+      "origin": [0, 640, 64],
+      "angles": [0, 180, 0],
+      "zone": "central_exchange",
+      "purpose": "signage"
+    },
+    {
+      "id": "south_monitor",
+      "model": "models/props/monitor01.mdl",
+      "origin": [0, -640, 64],
+      "angles": [0, 0, 0],
+      "zone": "central_exchange",
+      "purpose": "signage"
+    },
+    {
+      "id": "north_pipe_run",
+      "model": "models/dys_cybernetic/pipes/pipe_main_64x512.mdl",
+      "origin": [1408, 896, 224],
+      "angles": [0, 90, 0],
+      "zone": "punk_foundry",
+      "purpose": "skyline_detail"
+    },
+    {
+      "id": "south_pipe_run",
+      "model": "models/dys_cybernetic/pipes/pipe_main_64x512.mdl",
+      "origin": [-1408, -896, 224],
+      "angles": [0, 90, 0],
+      "zone": "corp_arcology",
+      "purpose": "skyline_detail"
+    }
+  ],
+  "entities": [
+    {
+      "classname": "env_cubemap",
+      "origin": [0, 0, 192]
+    },
+    {
+      "classname": "env_cubemap",
+      "origin": [-1536, 0, 192]
+    },
+    {
+      "classname": "env_cubemap",
+      "origin": [1536, 0, 192]
+    },
+    {
+      "classname": "env_cubemap",
+      "origin": [0, 1024, 192]
+    },
+    {
+      "classname": "env_cubemap",
+      "origin": [0, -1024, 192]
+    }
+  ]
+}

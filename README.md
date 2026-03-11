@@ -13,7 +13,7 @@ You can either use an **LLM-generated layout** (JSON from a model) or the **stat
 1. **Prepare the LLM request** (run from `dystopia_citygen`):
    ```bat
    cd dystopia_citygen
-   python prepare_llm_request.py
+   prepare_llm_request.bat
    ```
    This writes `output/llm_layout_request.md` with the system prompt, schema, and catalog paths.
 
@@ -51,7 +51,7 @@ run_generator.bat
 
 You get the same result if you use `--use-llm-layout` but `output/layout.json` does not exist.
 
-### Generator options (run_generator.bat / run_generator.py)
+### Generator options (run_generator.bat)
 
 | Option | Description |
 |--------|-------------|
@@ -61,4 +61,16 @@ You get the same result if you use `--use-llm-layout` but `output/layout.json` d
 | `--map-name <name>` | Output VMF name without extension (default: from layout or `dys_ai`). |
 | `--compile` | Run vbsp, vvis, vrad after writing the VMF to produce a .bsp. |
 
-**Where to run:** Run `run_generator.bat` from the **maps** folder so the VMF (and BSP) are written there. Run `prepare_llm_request.py` from **dystopia_citygen**.
+**Where to run:** Run `run_generator.bat` from the **maps** folder so the VMF (and BSP) are written there. Run `prepare_llm_request.bat` from **dystopia_citygen**.
+
+### Other scripts (use the .bat variants)
+
+| Task | Command (from dystopia_citygen) |
+|------|--------------------------------|
+| Prepare LLM request | `prepare_llm_request.bat` |
+| Catalog textures (base) | `catalog_textures.bat` |
+| Catalog used textures (VMF scan) | `catalog_used_textures.bat` [--vmf-dir ...] [--output-dir ...] |
+| Generate static layout JSON | `generate_layout.bat` |
+| Compile existing VMF | `compile_map.bat` [vmf_path] |
+
+Use the **.bat** files so execution can be allowed in Cursor; do not invoke `.py` scripts directly.
