@@ -2,6 +2,8 @@
 
 Generate Dystopia map layouts (JSON) and export them to VMF, then optionally compile to BSP.
 
+![In-game screenshot of a completely AI-generated Dystopia map](doc/2026-03-11_20-54.png)
+
 ## How to use the tool chain
 
 You can either use an **LLM-generated layout** (JSON from a model) or the **static MVP** (hardcoded arena). The generator writes the VMF into the **maps** folder (parent of `dystopia_citygen`).
