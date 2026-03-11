@@ -1,0 +1,138 @@
+{
+  "map_name": "dys_ai2",
+  "grid": 128,
+  "districts": [
+    {
+      "name": "corp_side",
+      "type": "corporate",
+      "bounds": [-1280, -640, 0, 640],
+      "material_theme": "clean_corporate",
+      "preferred_material_groups": ["urban", "twincannon"]
+    },
+    {
+      "name": "punk_side",
+      "type": "industrial",
+      "bounds": [0, -640, 1280, 640],
+      "material_theme": "industrial",
+      "preferred_material_groups": ["urban", "vaccinecore"]
+    }
+  ],
+  "streets": [
+    {
+      "name": "main_route",
+      "path": [[-1280, -128], [0, -128], [1280, -128]],
+      "width": 256
+    },
+    {
+      "name": "north_flank",
+      "path": [[-896, 256], [0, 256], [896, 256]],
+      "width": 192
+    },
+    {
+      "name": "south_alley",
+      "path": [[-640, -384], [640, -384]],
+      "width": 128
+    }
+  ],
+  "buildings": [
+    {
+      "id": "corp_spawn_building",
+      "style": "block",
+      "base": [-1408, -256],
+      "size": [256, 384],
+      "height": 256,
+      "floors": 2,
+      "roof_access": true,
+      "materials": {
+        "floor": "urban/conc_clean2",
+        "wall": "twincannon/dys_office/office_wall2",
+        "roof": "vaccine/dys_metalroof"
+      }
+    },
+    {
+      "id": "punk_spawn_building",
+      "style": "block",
+      "base": [1280, -256],
+      "size": [256, 384],
+      "height": 320,
+      "floors": 2,
+      "roof_access": true,
+      "materials": {
+        "floor": "urban/conc_clean2",
+        "wall": "urban/dys_urban_chipboard_04",
+        "roof": "vaccine/dys_metalroof"
+      }
+    },
+    {
+      "id": "courtyard",
+      "style": "open",
+      "base": [-512, -384],
+      "size": [1024, 512],
+      "height": 128,
+      "floors": 1,
+      "roof_access": false
+    },
+    {
+      "id": "objective_tower",
+      "style": "tower",
+      "base": [-128, 64],
+      "size": [256, 256],
+      "height": 384,
+      "floors": 3,
+      "roof_access": true,
+      "materials": {
+        "floor": "urban/conc_clean2",
+        "wall": "vaccinecore/metal_panelwall_001",
+        "roof": "vaccine/dys_metalroof"
+      }
+    },
+    {
+      "id": "roof_bridge",
+      "style": "platform",
+      "base": [-384, 128],
+      "size": [768, 128],
+      "height": 288,
+      "floors": 1,
+      "roof_access": true,
+      "materials": {
+        "floor": "twincannon/concretefloor009a_fixed",
+        "wall": "twincannon/concretefloor009a_fixed",
+        "roof": "twincannon/concretefloor009a_fixed"
+      }
+    }
+  ],
+  "objectives": [
+    {
+      "type": "datacore",
+      "position": [0, 192, 200]
+    }
+  ],
+  "spawns": {
+    "corp": [[-1280, 0, -64], [-1280, 128, -64], [-1280, -128, -64]],
+    "punk": [[1344, 0, -64], [1344, -128, -64]]
+  },
+  "props": [
+    {
+      "id": "corp_lamp",
+      "model": "models/props_wasteland/prison_lamp001b.mdl",
+      "origin": [-1344, 0, 96],
+      "angles": [0, 0, 0],
+      "zone": "corp_side",
+      "purpose": "spawn_lighting"
+    },
+    {
+      "id": "punk_lamp",
+      "model": "models/props_wasteland/prison_lamp001b.mdl",
+      "origin": [1408, 0, 128],
+      "angles": [0, 180, 0],
+      "zone": "punk_side",
+      "purpose": "spawn_lighting"
+    }
+  ],
+  "entities": [
+    {
+      "classname": "env_cubemap",
+      "origin": [0, 192, 200]
+    }
+  ]
+}

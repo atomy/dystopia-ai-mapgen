@@ -1,0 +1,118 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Dystopia city layout",
+  "description": "Scene for JSON-to-VMF export. AI must output only JSON matching this schema.",
+  "type": "object",
+  "required": ["map_name", "grid", "districts", "streets", "buildings", "objectives", "spawns"],
+  "properties": {
+    "map_name": { "type": "string", "pattern": "^[a-z0-9_]+$" },
+    "grid": { "type": "integer", "minimum": 64 },
+    "districts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "type", "bounds"],
+        "properties": {
+          "name": { "type": "string" },
+          "type": { "type": "string" },
+          "bounds": { "type": "array", "items": { "type": "integer" }, "minItems": 4, "maxItems": 4 },
+          "material_theme": { "type": "string" },
+          "preferred_material_groups": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        }
+      }
+    },
+    "streets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "path", "width"],
+        "properties": {
+          "name": { "type": "string" },
+          "path": { "type": "array", "items": { "type": "array", "items": { "type": "integer" }, "minItems": 2, "maxItems": 2 } },
+          "width": { "type": "integer", "minimum": 64 }
+        }
+      }
+    },
+    "buildings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "style", "base", "size", "height"],
+        "properties": {
+          "id": { "type": "string" },
+          "style": { "type": "string" },
+          "base": { "type": "array", "items": { "type": "integer" }, "minItems": 2, "maxItems": 2 },
+          "size": { "type": "array", "items": { "type": "integer" }, "minItems": 2, "maxItems": 2 },
+          "height": { "type": "integer", "minimum": 128 },
+          "floors": { "type": "integer", "minimum": 1 },
+          "roof_access": { "type": "boolean" },
+          "materials": {
+            "type": "object",
+            "properties": {
+              "floor": { "type": "string" },
+              "wall": { "type": "string" },
+              "trim": { "type": "string" },
+              "roof": { "type": "string" }
+            },
+            "additionalProperties": { "type": "string" }
+          }
+        }
+      }
+    },
+    "objectives": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["type", "position"],
+        "properties": {
+          "type": { "type": "string" },
+          "position": { "type": "array", "items": { "type": "integer" }, "minItems": 3, "maxItems": 3 }
+        }
+      }
+    },
+    "spawns": {
+      "type": "object",
+      "required": ["corp", "punk"],
+      "properties": {
+        "corp": { "type": "array", "items": { "type": "array", "items": { "type": "integer" }, "minItems": 3, "maxItems": 3 } },
+        "punk": { "type": "array", "items": { "type": "array", "items": { "type": "integer" }, "minItems": 3, "maxItems": 3 } }
+      }
+    },
+    "props": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "model", "origin"],
+        "properties": {
+          "id": { "type": "string" },
+          "model": { "type": "string" },
+          "origin": { "type": "array", "items": { "type": "integer" }, "minItems": 3, "maxItems": 3 },
+          "angles": { "type": "array", "items": { "type": "integer" }, "minItems": 3, "maxItems": 3 },
+          "zone": { "type": "string" },
+          "purpose": { "type": "string" }
+        }
+      }
+    },
+    "entities": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["classname", "origin"],
+        "properties": {
+          "classname": { "type": "string" },
+          "origin": { "type": "array", "items": { "type": "integer" }, "minItems": 3, "maxItems": 3 },
+          "angles": { "type": "array", "items": { "type": "integer" }, "minItems": 3, "maxItems": 3 },
+          "properties": {
+            "type": "object",
+            "additionalProperties": {
+              "type": ["string", "integer", "number", "boolean"]
+            }
+          }
+        }
+      }
+    }
+  }
+}
