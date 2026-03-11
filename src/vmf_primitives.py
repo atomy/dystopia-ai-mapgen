@@ -5,6 +5,7 @@ All emit known-good convex brushes (6 sides). Coordinates: X, Y horizontal; Z up
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -20,11 +21,14 @@ def add_box(
     depth: float,
     height: float,
     material: str = "DEV/DEV_MEASUREGENERIC01",
+    face_materials: Sequence[str] | None = None,
 ) -> None:
     """
     Add a 6-sided convex brush (axis-aligned box).
     Origin (x,y,z) = min corner; width (X+), depth (Y+), height (Z+).
     Face order and winding match Hammer/working VMF: same order as dys_cybercybercyber.vmf.
+    `face_materials`, when set, overrides per-face materials in this order:
+    top, bottom, x-, x+, y+, y-.
     """
     x0, y0, z0 = x, y, z
     x1, y1, z1 = x + width, y + depth, z + height
@@ -39,7 +43,7 @@ def add_box(
         ((x1, y1, z1), (x0, y1, z1), (x0, y1, z0)),   # y+
         ((x1, y0, z0), (x0, y0, z0), (x0, y0, z1)),   # y-
     ]
-    writer.add_brush(planes, material)
+    writer.add_brush(planes, face_materials if face_materials is not None else material)
 
 
 def add_room(

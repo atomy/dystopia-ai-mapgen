@@ -1,0 +1,1 @@
+@README.md generate a fancy dystopia map following instructions and call it dys_<model-name>.vmf, generate the layout, do not use any pre-existing layouts, after building do a test compile and fix any issues

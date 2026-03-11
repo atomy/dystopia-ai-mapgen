@@ -2,7 +2,9 @@
 
 Generate Dystopia map layouts (JSON) and export them to VMF, then optionally compile to BSP.
 
-![In-game screenshot of a completely AI-generated Dystopia map](doc/2026-03-11_20-54.png)
+![In-game screenshot of a completely AI-generated Dystopia map](doc/benchmark/dys_gpt_5_4_xhigh.png)
+
+*Benchmark runs and more screenshots: [doc/benchmark/README.md](doc/benchmark/README.md).*
 
 ## How to use the tool chain
 

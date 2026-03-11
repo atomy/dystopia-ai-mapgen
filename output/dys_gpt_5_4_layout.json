@@ -1,0 +1,239 @@
+{
+  "map_name": "dys_gpt_5_4",
+  "grid": 128,
+  "districts": [
+    {
+      "name": "corp_gate",
+      "type": "corporate",
+      "bounds": [-2048, -896, -640, 896],
+      "material_theme": "clean_corporate",
+      "preferred_material_groups": ["urban", "twincannon", "vaccinecore"]
+    },
+    {
+      "name": "relay_mid",
+      "type": "transit",
+      "bounds": [-640, -1024, 640, 1024],
+      "material_theme": "data_exchange",
+      "preferred_material_groups": ["twincannon", "vaccinecore", "urban"]
+    },
+    {
+      "name": "punk_stack",
+      "type": "industrial",
+      "bounds": [640, -896, 2048, 896],
+      "material_theme": "scrap_industrial",
+      "preferred_material_groups": ["urban", "vaccinecore", "twincannon"]
+    }
+  ],
+  "streets": [
+    {
+      "name": "spine",
+      "path": [[-1664, 0], [-896, 0], [0, 0], [896, 0], [1664, 0]],
+      "width": 384
+    },
+    {
+      "name": "north_flank",
+      "path": [[-1536, 640], [-768, 640], [0, 768], [768, 640], [1536, 640]],
+      "width": 192
+    },
+    {
+      "name": "south_service",
+      "path": [[-1536, -640], [-768, -640], [0, -768], [768, -640], [1536, -640]],
+      "width": 192
+    },
+    {
+      "name": "mid_cross",
+      "path": [[0, -896], [0, -256], [0, 256], [0, 896]],
+      "width": 256
+    }
+  ],
+  "buildings": [
+    {
+      "id": "corp_spawn_anchor",
+      "style": "fortress",
+      "base": [-2048, -512],
+      "size": [512, 1024],
+      "height": 384,
+      "floors": 3,
+      "roof_access": true,
+      "materials": {
+        "floor": "urban/conc_clean2",
+        "wall": "twincannon/dys_office/office_wall2",
+        "roof": "vaccine/dys_metalroof"
+      }
+    },
+    {
+      "id": "corp_north_bastion",
+      "style": "block",
+      "base": [-1280, 384],
+      "size": [384, 512],
+      "height": 320,
+      "floors": 2,
+      "roof_access": true,
+      "materials": {
+        "floor": "urban/conc_clean2",
+        "wall": "vaccinecore/metal_panelwall_001",
+        "roof": "vaccine/dys_metalroof"
+      }
+    },
+    {
+      "id": "corp_south_bastion",
+      "style": "block",
+      "base": [-1280, -896],
+      "size": [384, 512],
+      "height": 320,
+      "floors": 2,
+      "roof_access": true,
+      "materials": {
+        "floor": "urban/conc_clean2",
+        "wall": "vaccinecore/metal_panelwall_001",
+        "roof": "vaccine/dys_metalroof"
+      }
+    },
+    {
+      "id": "mid_north_bridge",
+      "style": "platform",
+      "base": [-384, 512],
+      "size": [768, 256],
+      "height": 320,
+      "floors": 1,
+      "roof_access": true,
+      "materials": {
+        "floor": "twincannon/concretefloor009a_fixed",
+        "wall": "twincannon/concretefloor009a_fixed",
+        "roof": "twincannon/concretefloor009a_fixed"
+      }
+    },
+    {
+      "id": "mid_south_bridge",
+      "style": "platform",
+      "base": [-384, -768],
+      "size": [768, 256],
+      "height": 320,
+      "floors": 1,
+      "roof_access": true,
+      "materials": {
+        "floor": "twincannon/concretefloor009a_fixed",
+        "wall": "twincannon/concretefloor009a_fixed",
+        "roof": "twincannon/concretefloor009a_fixed"
+      }
+    },
+    {
+      "id": "relay_core",
+      "style": "tower",
+      "base": [-256, -256],
+      "size": [512, 512],
+      "height": 640,
+      "floors": 4,
+      "roof_access": true,
+      "materials": {
+        "floor": "urban/conc_clean2",
+        "wall": "vaccinecore/metal_panelwall_001",
+        "roof": "vaccine/dys_metalroof"
+      }
+    },
+    {
+      "id": "mid_east_cover",
+      "style": "block",
+      "base": [640, 256],
+      "size": [384, 384],
+      "height": 256,
+      "floors": 2,
+      "roof_access": true,
+      "materials": {
+        "floor": "urban/conc_clean2",
+        "wall": "urban/dys_urban_chipboard_04",
+        "roof": "vaccine/dys_metalroof"
+      }
+    },
+    {
+      "id": "mid_west_cover",
+      "style": "block",
+      "base": [-1024, -640],
+      "size": [384, 384],
+      "height": 256,
+      "floors": 2,
+      "roof_access": true,
+      "materials": {
+        "floor": "urban/conc_clean2",
+        "wall": "urban/dys_urban_chipboard_04",
+        "roof": "vaccine/dys_metalroof"
+      }
+    },
+    {
+      "id": "punk_north_foundry",
+      "style": "block",
+      "base": [896, 384],
+      "size": [384, 512],
+      "height": 320,
+      "floors": 2,
+      "roof_access": true,
+      "materials": {
+        "floor": "urban/conc_clean2",
+        "wall": "urban/dys_urban_chipboard_04",
+        "roof": "vaccine/dys_metalroof"
+      }
+    },
+    {
+      "id": "punk_south_foundry",
+      "style": "block",
+      "base": [896, -896],
+      "size": [384, 512],
+      "height": 320,
+      "floors": 2,
+      "roof_access": true,
+      "materials": {
+        "floor": "urban/conc_clean2",
+        "wall": "urban/dys_urban_chipboard_04",
+        "roof": "vaccine/dys_metalroof"
+      }
+    },
+    {
+      "id": "punk_spawn_anchor",
+      "style": "fortress",
+      "base": [1536, -512],
+      "size": [512, 1024],
+      "height": 384,
+      "floors": 3,
+      "roof_access": true,
+      "materials": {
+        "floor": "urban/conc_clean2",
+        "wall": "urban/dys_urban_chipboard_04",
+        "roof": "vaccine/dys_metalroof"
+      }
+    },
+    {
+      "id": "objective_plaza",
+      "style": "open",
+      "base": [-512, -512],
+      "size": [1024, 1024],
+      "height": 0,
+      "floors": 1,
+      "roof_access": false
+    }
+  ],
+  "objectives": [
+    {
+      "type": "datacore",
+      "position": [0, 0, 704]
+    }
+  ],
+  "spawns": {
+    "corp": [
+      [-1792, -128, -32],
+      [-1792, 128, -32],
+      [-1664, 0, -32]
+    ],
+    "punk": [
+      [1792, -128, -32],
+      [1792, 128, -32],
+      [1664, 0, -32]
+    ]
+  },
+  "props": [],
+  "entities": [
+    {
+      "classname": "env_cubemap",
+      "origin": [0, 0, 192]
+    }
+  ]
+}

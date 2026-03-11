@@ -27,7 +27,7 @@ from generate_layout import generate_mvp_arena
 from compile_tools import compile_map
 from scene_to_vmf import scene_to_vmf
 from layout_rules import scene_from_json_dict
-from validate_map import validate_vmf_text, validate_writer
+from validate_map import validate_scene_layout, validate_vmf_text, validate_writer
 
 
 def parse_args() -> argparse.Namespace:
@@ -71,6 +71,13 @@ def main() -> int:
     else:
         scene = generate_mvp_arena()
     map_name = args.map_name or scene.map_name
+
+    scene_errors = validate_scene_layout(scene)
+    if scene_errors:
+        for error in scene_errors:
+            print("Scene validation error:", error)
+        return 1
+
     writer = scene_to_vmf(scene)
 
     errors = validate_writer(writer)

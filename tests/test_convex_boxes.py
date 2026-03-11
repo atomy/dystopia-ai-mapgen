@@ -36,3 +36,17 @@ def test_multiple_boxes_distinct_solids() -> None:
     id1 = w.world_solids[0]["id"]
     id2 = w.world_solids[1]["id"]
     assert id1 != id2
+
+
+def test_box_supports_per_face_materials() -> None:
+    w = VmfWriter()
+    face_materials = [
+        "TOOLS/TOOLSSKYBOX",
+        "DEV/DEV_MEASUREGENERIC01",
+        "BRICK/WALL_A",
+        "BRICK/WALL_B",
+        "BRICK/WALL_C",
+        "BRICK/WALL_D",
+    ]
+    add_box(w, 0, 0, 0, 64, 64, 64, face_materials=face_materials)
+    assert [side["material"] for side in w.world_solids[0]["sides"]] == face_materials

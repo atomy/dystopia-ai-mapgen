@@ -5,6 +5,7 @@ Emits only known-good convex brushes (via add_brush). Do not generate arbitrary 
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from typing import Any
 
 
@@ -59,11 +60,27 @@ class VmfWriter:
         self.next_id += 1
         return i
 
-    def add_brush(self, planes: list[tuple[tuple[float, float, float], tuple[float, float, float], tuple[float, float, float]]], material: str) -> None:
-        """Add one solid (6 sides) from list of 3-point planes. Order: bottom, top, x-, x+, y-, y+."""
+    def add_brush(
+        self,
+        planes: list[tuple[tuple[float, float, float], tuple[float, float, float], tuple[float, float, float]]],
+        material: str | Sequence[str],
+    ) -> None:
+        """Add one solid from list of 3-point planes.
+
+        `material` may be a single material for every face or a sequence with one
+        entry per plane in this order: top, bottom, x-, x+, y+, y-.
+        """
         solid_id = self.alloc_id()
         sides = []
         axis_order = ["z+", "z-", "x-", "x+", "y+", "y-"]  # matches plane order: top, bottom, x-, x+, y+, y-
+        if isinstance(material, str):
+            face_materials = [material] * len(planes)
+        else:
+            face_materials = list(material)
+            if len(face_materials) != len(planes):
+                raise ValueError(
+                    f"Expected {len(planes)} face materials, got {len(face_materials)}"
+                )
         for i, (p1, p2, p3) in enumerate(planes):
             side_id = self.alloc_id()
             axis = axis_order[i] if i < len(axis_order) else _normal_axis_for_plane(p1, p2, p3)
@@ -71,7 +88,7 @@ class VmfWriter:
             sides.append({
                 "id": side_id,
                 "plane": _plane_string(p1, p2, p3),
-                "material": material,
+                "material": face_materials[i],
                 "uaxis": uaxis,
                 "vaxis": vaxis,
                 "rotation": "0",

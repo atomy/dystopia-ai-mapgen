@@ -1,0 +1,470 @@
+{
+  "map_name": "dys_sonnet_4_6_think",
+  "grid": 128,
+  "districts": [
+    {
+      "name": "silicon_citadel",
+      "type": "corporate",
+      "bounds": [-2176, -1408, -640, 1408],
+      "material_theme": "clean_corporate_tech",
+      "preferred_material_groups": ["vaccinecore", "twincannon", "dys_nameless"]
+    },
+    {
+      "name": "neon_deadzone",
+      "type": "transit",
+      "bounds": [-640, -896, 640, 896],
+      "material_theme": "neon_urban_decay",
+      "preferred_material_groups": ["dys_nameless", "urban", "concrete"]
+    },
+    {
+      "name": "rust_warrens",
+      "type": "slums",
+      "bounds": [640, -1408, 2176, 1408],
+      "material_theme": "industrial_punk",
+      "preferred_material_groups": ["cesspool", "urban", "radioshack"]
+    },
+    {
+      "name": "sky_highway",
+      "type": "elevated",
+      "bounds": [-1152, 640, 1152, 1024],
+      "material_theme": "metal_grating_elevated",
+      "preferred_material_groups": ["cesspool", "metal"]
+    }
+  ],
+  "streets": [
+    {
+      "name": "main_boulevard",
+      "path": [[-1920, 0], [-640, 0], [640, 0], [1920, 0]],
+      "width": 384
+    },
+    {
+      "name": "north_sky_road",
+      "path": [[-1664, 896], [-640, 896], [640, 896], [1664, 896]],
+      "width": 256
+    },
+    {
+      "name": "south_sewer_run",
+      "path": [[-1664, -896], [-640, -896], [640, -896], [1664, -896]],
+      "width": 256
+    },
+    {
+      "name": "corp_north_spine",
+      "path": [[-1792, 0], [-1792, 896]],
+      "width": 192
+    },
+    {
+      "name": "corp_south_spine",
+      "path": [[-1792, 0], [-1792, -896]],
+      "width": 192
+    },
+    {
+      "name": "punk_north_spine",
+      "path": [[1792, 0], [1792, 896]],
+      "width": 192
+    },
+    {
+      "name": "punk_south_spine",
+      "path": [[1792, 0], [1792, -896]],
+      "width": 192
+    }
+  ],
+  "buildings": [
+    {
+      "id": "corp_bastion",
+      "style": "tower",
+      "base": [-2176, -768],
+      "size": [512, 1536],
+      "height": 640,
+      "floors": 5,
+      "roof_access": true,
+      "materials": {
+        "floor": "vaccinecore/metal_panelsmall_001",
+        "wall": "vaccinecore/metal_panelwall_001",
+        "trim": "vaccinecore/metal_panelwall_003",
+        "roof": "vaccinecore/metal_panelwall_003"
+      }
+    },
+    {
+      "id": "corp_command_hub",
+      "style": "tower",
+      "base": [-1408, -384],
+      "size": [384, 768],
+      "height": 512,
+      "floors": 4,
+      "roof_access": true,
+      "materials": {
+        "floor": "dys_nameless/name_quantumfloor",
+        "wall": "twincannon/dys_office/office_wall2",
+        "trim": "vaccinecore/metal_panelwall_001",
+        "roof": "vaccinecore/metal_panelwall_003"
+      }
+    },
+    {
+      "id": "corp_north_wing",
+      "style": "block",
+      "base": [-1664, 640],
+      "size": [256, 384],
+      "height": 384,
+      "floors": 3,
+      "roof_access": true,
+      "materials": {
+        "floor": "twincannon/concretefloor009a_fixed",
+        "wall": "coast/zsec1",
+        "roof": "twincannon/concretefloor009a_fixed"
+      }
+    },
+    {
+      "id": "corp_south_wing",
+      "style": "block",
+      "base": [-1664, -1024],
+      "size": [256, 384],
+      "height": 384,
+      "floors": 3,
+      "roof_access": true,
+      "materials": {
+        "floor": "twincannon/concretefloor009a_fixed",
+        "wall": "coast/zsec1",
+        "roof": "twincannon/concretefloor009a_fixed"
+      }
+    },
+    {
+      "id": "data_nexus_vault",
+      "style": "tower",
+      "base": [-256, -256],
+      "size": [512, 512],
+      "height": 768,
+      "floors": 6,
+      "roof_access": true,
+      "materials": {
+        "floor": "dys_nameless/name_quantumfloor",
+        "wall": "dys_nameless/name_metal_panel",
+        "trim": "dys_nameless/name_weaponcharging",
+        "roof": "dys_nameless/name_metal_panel"
+      }
+    },
+    {
+      "id": "north_sky_bridge",
+      "style": "platform",
+      "base": [-1152, 768],
+      "size": [2304, 128],
+      "height": 384,
+      "floors": 1,
+      "roof_access": true,
+      "materials": {
+        "floor": "cesspool/dys_cpd3",
+        "wall": "cesspool/dys_mf6",
+        "roof": "cesspool/dys_cpd3"
+      }
+    },
+    {
+      "id": "south_sky_bridge",
+      "style": "platform",
+      "base": [-1152, -896],
+      "size": [2304, 128],
+      "height": 384,
+      "floors": 1,
+      "roof_access": true,
+      "materials": {
+        "floor": "cesspool/dys_cpd3",
+        "wall": "cesspool/dys_mf6",
+        "roof": "cesspool/dys_cpd3"
+      }
+    },
+    {
+      "id": "punk_control_hub",
+      "style": "tower",
+      "base": [1024, -384],
+      "size": [384, 768],
+      "height": 512,
+      "floors": 4,
+      "roof_access": true,
+      "materials": {
+        "floor": "cesspool/dys_cpwall2",
+        "wall": "cesspool/dys_cpwall1",
+        "trim": "cesspool/dys_cpd1",
+        "roof": "cesspool/dys_mf7"
+      }
+    },
+    {
+      "id": "punk_north_wing",
+      "style": "block",
+      "base": [1408, 640],
+      "size": [256, 384],
+      "height": 320,
+      "floors": 3,
+      "roof_access": true,
+      "materials": {
+        "floor": "cesspool/dys_cpwall2",
+        "wall": "urban/dys_urban_chipboard_04",
+        "roof": "cesspool/dys_mf7"
+      }
+    },
+    {
+      "id": "punk_south_wing",
+      "style": "block",
+      "base": [1408, -1024],
+      "size": [256, 384],
+      "height": 320,
+      "floors": 3,
+      "roof_access": true,
+      "materials": {
+        "floor": "cesspool/dys_cpwall2",
+        "wall": "urban/dys_urban_chipboard_04",
+        "roof": "cesspool/dys_mf7"
+      }
+    },
+    {
+      "id": "punk_stronghold",
+      "style": "tower",
+      "base": [1664, -768],
+      "size": [512, 1536],
+      "height": 512,
+      "floors": 4,
+      "roof_access": true,
+      "materials": {
+        "floor": "urban/conc_clean2",
+        "wall": "cesspool/dys_cpwall2",
+        "trim": "cesspool/dys_cpd2",
+        "roof": "cesspool/dys_mf6"
+      }
+    },
+    {
+      "id": "central_cover_north",
+      "style": "block",
+      "base": [-128, 384],
+      "size": [256, 128],
+      "height": 192,
+      "floors": 1,
+      "roof_access": true,
+      "materials": {
+        "floor": "concrete/concretefloor_002a_t",
+        "wall": "concrete/concretefloor_002a_t",
+        "roof": "concrete/concretefloor_002a_t"
+      }
+    },
+    {
+      "id": "central_cover_south",
+      "style": "block",
+      "base": [-128, -512],
+      "size": [256, 128],
+      "height": 192,
+      "floors": 1,
+      "roof_access": true,
+      "materials": {
+        "floor": "concrete/concretefloor_002a_t",
+        "wall": "concrete/concretefloor_002a_t",
+        "roof": "concrete/concretefloor_002a_t"
+      }
+    },
+    {
+      "id": "west_cover_north",
+      "style": "block",
+      "base": [-896, 384],
+      "size": [256, 128],
+      "height": 192,
+      "floors": 1,
+      "roof_access": false,
+      "materials": {
+        "floor": "dys_nameless/concrete_001",
+        "wall": "dys_nameless/concrete_001",
+        "roof": "dys_nameless/concrete_001"
+      }
+    },
+    {
+      "id": "west_cover_south",
+      "style": "block",
+      "base": [-896, -512],
+      "size": [256, 128],
+      "height": 192,
+      "floors": 1,
+      "roof_access": false,
+      "materials": {
+        "floor": "dys_nameless/concrete_001",
+        "wall": "dys_nameless/concrete_001",
+        "roof": "dys_nameless/concrete_001"
+      }
+    },
+    {
+      "id": "east_cover_north",
+      "style": "block",
+      "base": [640, 384],
+      "size": [256, 128],
+      "height": 192,
+      "floors": 1,
+      "roof_access": false,
+      "materials": {
+        "floor": "dys_nameless/concrete_001",
+        "wall": "dys_nameless/concrete_001",
+        "roof": "dys_nameless/concrete_001"
+      }
+    },
+    {
+      "id": "east_cover_south",
+      "style": "block",
+      "base": [640, -512],
+      "size": [256, 128],
+      "height": 192,
+      "floors": 1,
+      "roof_access": false,
+      "materials": {
+        "floor": "dys_nameless/concrete_001",
+        "wall": "dys_nameless/concrete_001",
+        "roof": "dys_nameless/concrete_001"
+      }
+    }
+  ],
+  "objectives": [
+    {
+      "type": "datacore",
+      "position": [0, 0, 512]
+    }
+  ],
+  "spawns": {
+    "corp": [
+      [-1920, 0, -64],
+      [-1920, 256, -64],
+      [-1920, -256, -64],
+      [-1920, 512, -64],
+      [-1920, -512, -64],
+      [-1792, 128, -64],
+      [-1792, -128, -64]
+    ],
+    "punk": [
+      [1920, 0, -64],
+      [1920, 256, -64],
+      [1920, -256, -64],
+      [1920, 512, -64],
+      [1920, -512, -64],
+      [1792, 128, -64],
+      [1792, -128, -64]
+    ]
+  },
+  "props": [
+    {
+      "id": "corp_lamp_main_1",
+      "model": "models/props_c17/lamppost03a_on.mdl",
+      "origin": [-1536, 0, 0],
+      "angles": [0, 0, 0],
+      "zone": "silicon_citadel",
+      "purpose": "street_lighting"
+    },
+    {
+      "id": "corp_lamp_main_2",
+      "model": "models/props_c17/lamppost03a_on.mdl",
+      "origin": [-896, 0, 0],
+      "angles": [0, 0, 0],
+      "zone": "silicon_citadel",
+      "purpose": "street_lighting"
+    },
+    {
+      "id": "corp_monitor_hub",
+      "model": "models/dys_cybernetic/monitor_widescreen1.mdl",
+      "origin": [-1536, -256, 32],
+      "angles": [0, 0, 0],
+      "zone": "silicon_citadel",
+      "purpose": "corp_detail"
+    },
+    {
+      "id": "corp_liquid_tank",
+      "model": "models/dys_cybernetic/liquid_tank.mdl",
+      "origin": [-1536, 256, 32],
+      "angles": [0, 0, 0],
+      "zone": "silicon_citadel",
+      "purpose": "corp_detail"
+    },
+    {
+      "id": "nexus_lamp_north",
+      "model": "models/dys_cybernetic/lamp_sled_512.mdl",
+      "origin": [0, -384, 0],
+      "angles": [0, 90, 0],
+      "zone": "neon_deadzone",
+      "purpose": "objective_lighting"
+    },
+    {
+      "id": "center_lamp_north",
+      "model": "models/props_c17/lamppost03a_on.mdl",
+      "origin": [0, 384, 0],
+      "angles": [0, 90, 0],
+      "zone": "neon_deadzone",
+      "purpose": "street_lighting"
+    },
+    {
+      "id": "center_lamp_south",
+      "model": "models/props_c17/lamppost03a_on.mdl",
+      "origin": [0, -384, 0],
+      "angles": [0, 270, 0],
+      "zone": "neon_deadzone",
+      "purpose": "street_lighting"
+    },
+    {
+      "id": "punk_vendor_1",
+      "model": "models/props/dys_vendingmachine01.mdl",
+      "origin": [768, 256, 0],
+      "angles": [0, 180, 0],
+      "zone": "rust_warrens",
+      "purpose": "punk_detail"
+    },
+    {
+      "id": "punk_vendor_2",
+      "model": "models/props/dys_vendingmachine01b.mdl",
+      "origin": [768, -256, 0],
+      "angles": [0, 180, 0],
+      "zone": "rust_warrens",
+      "purpose": "punk_detail"
+    },
+    {
+      "id": "punk_generator",
+      "model": "models/fedio/gen_generator1.mdl",
+      "origin": [1664, 384, 0],
+      "angles": [0, 270, 0],
+      "zone": "rust_warrens",
+      "purpose": "punk_detail"
+    },
+    {
+      "id": "punk_lamp_main_1",
+      "model": "models/props_c17/lamppost03a_on.mdl",
+      "origin": [896, 0, 0],
+      "angles": [0, 180, 0],
+      "zone": "rust_warrens",
+      "purpose": "street_lighting"
+    },
+    {
+      "id": "punk_lamp_main_2",
+      "model": "models/props_c17/lamppost03a_on.mdl",
+      "origin": [1536, 0, 0],
+      "angles": [0, 180, 0],
+      "zone": "rust_warrens",
+      "purpose": "street_lighting"
+    }
+  ],
+  "entities": [
+    {
+      "classname": "env_cubemap",
+      "origin": [0, 0, 384]
+    },
+    {
+      "classname": "env_cubemap",
+      "origin": [-1664, 0, 256]
+    },
+    {
+      "classname": "env_cubemap",
+      "origin": [1664, 0, 256]
+    },
+    {
+      "classname": "env_cubemap",
+      "origin": [-640, 512, 256]
+    },
+    {
+      "classname": "env_cubemap",
+      "origin": [640, -512, 256]
+    },
+    {
+      "classname": "env_cubemap",
+      "origin": [0, 768, 384]
+    },
+    {
+      "classname": "env_cubemap",
+      "origin": [0, -768, 384]
+    }
+  ]
+}

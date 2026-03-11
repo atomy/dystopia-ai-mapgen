@@ -5,20 +5,18 @@ Convert Scene to VMF: build world solids and Dystopia entities from layout.
 from __future__ import annotations
 
 from layout_rules import EntityHint, PropPlacement, Scene
+from model_placement_rules import resolve_prop_origin
 from vmf_writer import VmfWriter
 from vmf_primitives import add_box, add_sky_shell
 from dystopia_entities import (
     add_dys_spawn,
     add_dys_spawn_point,
-    add_dys_jackpoint,
-    add_point_camera,
     TEAM_CORP,
     TEAM_PUNK,
 )
+from spawn_layout import FLOOR_THICKNESS, FLOOR_Z, SPAWN_FLOOR_Z, resolve_spawn_positions
 
 
-FLOOR_Z = -64
-FLOOR_THICKNESS = 32
 MAT_FLOOR = "DEV/DEV_MEASUREGENERIC01"
 MAT_WALL = "DEV/DEV_MEASUREGENERIC01"
 MAT_ROOF = "DEV/DEV_MEASUREGENERIC01"
@@ -26,7 +24,6 @@ SKY_MATERIAL = "TOOLS/TOOLSSKYBOX"
 SKY_WALL_HEIGHT = 1152
 SKY_THICKNESS = 64
 ARENA_PADDING = 256
-SPAWN_CLEARANCE = 128
 
 
 def _vec3(values: tuple[int, int, int]) -> str:
@@ -40,10 +37,11 @@ def _angles(values: tuple[int, int, int] | None) -> str:
 
 
 def _add_prop(writer: VmfWriter, prop: PropPlacement) -> None:
+    origin = resolve_prop_origin(prop.model, prop.origin)
     writer.add_entity(
         "prop_static",
         model=prop.model,
-        origin=_vec3(prop.origin),
+        origin=_vec3(origin),
         angles=_angles(prop.angles),
         solid="6",
     )
@@ -104,48 +102,6 @@ def _scene_bounds(scene: Scene) -> tuple[int, int, int, int]:
     )
 
 
-def _clamp_to_arena(
-    x: int, y: int, x_min: int, y_min: int, x_max: int, y_max: int, margin: int = 64
-) -> tuple[int, int]:
-    """Clamp x,y to inside the playable area (inside sky shell / floor)."""
-    return (
-        max(x_min + margin, min(x_max - margin, x)),
-        max(y_min + margin, min(y_max - margin, y)),
-    )
-
-
-def _move_spawn_out_of_buildings(
-    x: int,
-    y: int,
-    buildings: list[tuple[tuple[int, int], tuple[int, int]]],
-    clearance: int = SPAWN_CLEARANCE,
-) -> tuple[int, int, str]:
-    """Keep spawn points out of building solids and away from walls, facing outward."""
-    yaw = "0"
-    for (bx, by), (bw, bd) in buildings:
-        x0, y0 = bx, by
-        x1, y1 = bx + bw, by + bd
-        # Keep a clearance ring around each building so pads are not pressed against walls.
-        if (x0 - clearance) <= x <= (x1 + clearance) and (y0 - clearance) <= y <= (y1 + clearance):
-            best = (x, y, yaw)
-            best_dist = float("inf")
-            # Source yaw: 0=east, 90=north, 180=west, 270=south.
-            # Face away from the wall that forced the spawn pad outward.
-            candidates = [
-                (x0 - clearance, y, "180"),
-                (x1 + clearance, y, "0"),
-                (x, y0 - clearance, "270"),
-                (x, y1 + clearance, "90"),
-            ]
-            for nx, ny, candidate_yaw in candidates:
-                dist = abs(nx - x) + abs(ny - y)
-                if dist < best_dist:
-                    best_dist = dist
-                    best = (nx, ny, candidate_yaw)
-            return best
-    return (x, y, yaw)
-
-
 def scene_to_vmf(scene: Scene) -> VmfWriter:
     writer = VmfWriter()
 
@@ -180,40 +136,36 @@ def scene_to_vmf(scene: Scene) -> VmfWriter:
         roof_material = b.materials.get("roof", wall_material or MAT_ROOF)
         floor_material = b.materials.get("floor", MAT_FLOOR)
 
-        add_box(writer, x, y, FLOOR_Z + FLOOR_THICKNESS, w, d, b.height, wall_material)
+        # Use a single brush with per-face materials so roofs/floors inherit their
+        # own materials without creating overlapping coplanar cap brushes.
+        add_box(
+            writer,
+            x,
+            y,
+            FLOOR_Z + FLOOR_THICKNESS,
+            w,
+            d,
+            b.height,
+            wall_material,
+            face_materials=[
+                roof_material,
+                floor_material,
+                wall_material,
+                wall_material,
+                wall_material,
+                wall_material,
+            ],
+        )
 
-        # Add thin roof and floor caps so JSON material hints affect visible surfaces.
-        add_box(writer, x, y, FLOOR_Z + FLOOR_THICKNESS, w, d, 16, floor_material)
-        add_box(writer, x, y, FLOOR_Z + FLOOR_THICKNESS + b.height - 16, w, d, 16, roof_material)
-
-    # Dystopia entities: one spawn container + points per team, one jackpoint + camera
+    # Dystopia entities: one spawn container + points per team.
     # Spawns must be inside the arena (sky shell) and in empty space (not inside solid building brushes).
-    spawn_floor = FLOOR_Z + FLOOR_THICKNESS
+    spawn_floor = SPAWN_FLOOR_Z
     corp_spawns = scene.spawns.corp if scene.spawns.corp else [(-768, 0, spawn_floor)]
     punk_spawns = scene.spawns.punk if scene.spawns.punk else [(768, 0, spawn_floor)]
     building_boxes = [(b.base, b.size) for b in scene.buildings if b.height > 0]
-
-    def place_spawns(positions: list[tuple[int, int, int]], team_side: int) -> list[tuple[int, int, str]]:
-        """Clamp to arena, keep spawn pads clear of walls, and return x/y plus facing yaw."""
-        out: list[tuple[int, int, str]] = []
-        for pos in positions:
-            x, y = _clamp_to_arena(pos[0], pos[1], arena_x_min, arena_y_min, arena_x_max, arena_y_max)
-            x, y, yaw = _move_spawn_out_of_buildings(x, y, building_boxes)
-            x, y = _clamp_to_arena(x, y, arena_x_min, arena_y_min, arena_x_max, arena_y_max)
-            out.append((x, y, yaw))
-        if not out:
-            fallback = (
-                (arena_x_min + 128, (arena_y_min + arena_y_max) // 2)
-                if team_side == 1
-                else (arena_x_max - 128, (arena_y_min + arena_y_max) // 2)
-            )
-            x, y, yaw = _move_spawn_out_of_buildings(fallback[0], fallback[1], building_boxes)
-            x, y = _clamp_to_arena(x, y, arena_x_min, arena_y_min, arena_x_max, arena_y_max)
-            out.append((x, y, yaw))
-        return out
-
-    corp_xy = place_spawns(corp_spawns, 1)
-    punk_xy = place_spawns(punk_spawns, 2)
+    arena_bounds = (arena_x_min, arena_y_min, arena_x_max, arena_y_max)
+    corp_xy = resolve_spawn_positions(corp_spawns, 1, arena_bounds, building_boxes)
+    punk_xy = resolve_spawn_positions(punk_spawns, 2, arena_bounds, building_boxes)
     # Corp spawn id 1
     add_dys_spawn(writer, "1", TEAM_CORP, (corp_xy[0][0], corp_xy[0][1], spawn_floor))
     for (x, y, yaw) in corp_xy:
@@ -222,11 +174,6 @@ def scene_to_vmf(scene: Scene) -> VmfWriter:
     add_dys_spawn(writer, "2", TEAM_PUNK, (punk_xy[0][0], punk_xy[0][1], spawn_floor))
     for (x, y, yaw) in punk_xy:
         add_dys_spawn_point(writer, "2", (x, y, spawn_floor), angles=f"0 {yaw} 0")
-    # Jackpoint + camera near objective
-    obj_pos = scene.objectives[0].position
-    jp_x, jp_y, jp_z = obj_pos[0], obj_pos[1], obj_pos[2]
-    add_dys_jackpoint(writer, (jp_x, jp_y, jp_z), "cam1", (24, 24, 24))
-    add_point_camera(writer, "cam1", (jp_x + 64, jp_y, jp_z + 400))
 
     # Basic lighting so the map does not compile black.
     writer.add_entity(

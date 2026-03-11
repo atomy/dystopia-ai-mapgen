@@ -1,0 +1,444 @@
+{
+  "map_name": "dys_gpt_5_4_high",
+  "grid": 128,
+  "districts": [
+    {
+      "name": "corp_gate",
+      "type": "corporate",
+      "bounds": [-2304, -640, -896, 640],
+      "material_theme": "glass_concrete",
+      "preferred_material_groups": ["urban", "twincannon", "vaccinecore"]
+    },
+    {
+      "name": "north_highline",
+      "type": "industrial",
+      "bounds": [-2304, 512, 2304, 1920],
+      "material_theme": "clean_industrial",
+      "preferred_material_groups": ["twincannon", "urban"]
+    },
+    {
+      "name": "core_plaza",
+      "type": "datacore",
+      "bounds": [-896, -512, 896, 512],
+      "material_theme": "fortified_datawell",
+      "preferred_material_groups": ["vaccinecore", "twincannon"]
+    },
+    {
+      "name": "south_service",
+      "type": "service",
+      "bounds": [-2304, -1920, 2304, -512],
+      "material_theme": "grimy_service",
+      "preferred_material_groups": ["urban", "twincannon"]
+    },
+    {
+      "name": "punk_stack",
+      "type": "punk",
+      "bounds": [896, -640, 2304, 640],
+      "material_theme": "scrap_tenement",
+      "preferred_material_groups": ["urban", "vaccinecore"]
+    }
+  ],
+  "streets": [
+    {
+      "name": "spine_east_west",
+      "path": [[-2304, 0], [-896, 0], [896, 0], [2304, 0]],
+      "width": 512
+    },
+    {
+      "name": "north_arc",
+      "path": [[-2304, 1152], [-1024, 1152], [0, 896], [1024, 1152], [2304, 1152]],
+      "width": 384
+    },
+    {
+      "name": "south_arc",
+      "path": [[-2304, -1152], [-1024, -1152], [0, -896], [1024, -1152], [2304, -1152]],
+      "width": 384
+    },
+    {
+      "name": "service_spine",
+      "path": [[0, -1920], [0, -1024], [0, 0], [0, 1024], [0, 1920]],
+      "width": 384
+    },
+    {
+      "name": "west_flank",
+      "path": [[-1408, -1920], [-1408, -768], [-1408, 768], [-1408, 1920]],
+      "width": 256
+    },
+    {
+      "name": "east_flank",
+      "path": [[1408, -1920], [1408, -768], [1408, 768], [1408, 1920]],
+      "width": 256
+    }
+  ],
+  "buildings": [
+    {
+      "id": "corp_gate_block",
+      "style": "block",
+      "base": [-2304, -512],
+      "size": [640, 1024],
+      "height": 384,
+      "floors": 3,
+      "roof_access": true,
+      "materials": {
+        "floor": "urban/conc_clean2",
+        "wall": "twincannon/dys_office/office_wall2",
+        "roof": "vaccine/dys_metalroof"
+      }
+    },
+    {
+      "id": "west_north_tower",
+      "style": "tower",
+      "base": [-1536, 768],
+      "size": [512, 768],
+      "height": 768,
+      "floors": 6,
+      "roof_access": true,
+      "materials": {
+        "floor": "urban/conc_clean2",
+        "wall": "twincannon/dys_office/office_wall2",
+        "roof": "vaccine/dys_metalroof"
+      }
+    },
+    {
+      "id": "west_south_tower",
+      "style": "tower",
+      "base": [-1664, -1536],
+      "size": [640, 640],
+      "height": 640,
+      "floors": 5,
+      "roof_access": true,
+      "materials": {
+        "floor": "urban/conc_clean2",
+        "wall": "twincannon/dys_office/office_wall2",
+        "roof": "vaccine/dys_metalroof"
+      }
+    },
+    {
+      "id": "west_inner_north",
+      "style": "stack",
+      "base": [-1024, 512],
+      "size": [256, 256],
+      "height": 384,
+      "floors": 3,
+      "roof_access": true,
+      "materials": {
+        "floor": "twincannon/concretefloor009a_fixed",
+        "wall": "vaccinecore/metal_panelwall_001",
+        "roof": "vaccine/dys_metalroof"
+      }
+    },
+    {
+      "id": "west_inner_south",
+      "style": "stack",
+      "base": [-1024, -768],
+      "size": [256, 256],
+      "height": 384,
+      "floors": 3,
+      "roof_access": true,
+      "materials": {
+        "floor": "twincannon/concretefloor009a_fixed",
+        "wall": "vaccinecore/metal_panelwall_001",
+        "roof": "vaccine/dys_metalroof"
+      }
+    },
+    {
+      "id": "punk_gate_block",
+      "style": "block",
+      "base": [1664, -512],
+      "size": [640, 1024],
+      "height": 384,
+      "floors": 3,
+      "roof_access": true,
+      "materials": {
+        "floor": "twincannon/concretefloor009a_fixed",
+        "wall": "urban/dys_urban_chipboard_04",
+        "roof": "vaccine/dys_metalroof"
+      }
+    },
+    {
+      "id": "east_north_tower",
+      "style": "tower",
+      "base": [1024, 896],
+      "size": [512, 768],
+      "height": 896,
+      "floors": 7,
+      "roof_access": true,
+      "materials": {
+        "floor": "twincannon/concretefloor009a_fixed",
+        "wall": "urban/dys_urban_chipboard_04",
+        "roof": "vaccine/dys_metalroof"
+      }
+    },
+    {
+      "id": "east_south_tower",
+      "style": "tower",
+      "base": [1152, -1536],
+      "size": [640, 640],
+      "height": 640,
+      "floors": 5,
+      "roof_access": true,
+      "materials": {
+        "floor": "twincannon/concretefloor009a_fixed",
+        "wall": "urban/dys_urban_chipboard_04",
+        "roof": "vaccine/dys_metalroof"
+      }
+    },
+    {
+      "id": "east_inner_north",
+      "style": "stack",
+      "base": [768, 512],
+      "size": [256, 256],
+      "height": 384,
+      "floors": 3,
+      "roof_access": true,
+      "materials": {
+        "floor": "urban/conc_clean2",
+        "wall": "vaccinecore/metal_panelwall_001",
+        "roof": "vaccine/dys_metalroof"
+      }
+    },
+    {
+      "id": "east_inner_south",
+      "style": "stack",
+      "base": [768, -768],
+      "size": [256, 256],
+      "height": 384,
+      "floors": 3,
+      "roof_access": true,
+      "materials": {
+        "floor": "urban/conc_clean2",
+        "wall": "vaccinecore/metal_panelwall_001",
+        "roof": "vaccine/dys_metalroof"
+      }
+    },
+    {
+      "id": "north_data_wall",
+      "style": "slab",
+      "base": [-512, 640],
+      "size": [1024, 384],
+      "height": 384,
+      "floors": 3,
+      "roof_access": true,
+      "materials": {
+        "floor": "urban/conc_clean2",
+        "wall": "vaccinecore/metal_panelwall_001",
+        "roof": "vaccine/dys_metalroof"
+      }
+    },
+    {
+      "id": "south_data_wall",
+      "style": "slab",
+      "base": [-512, -1024],
+      "size": [1024, 384],
+      "height": 384,
+      "floors": 3,
+      "roof_access": true,
+      "materials": {
+        "floor": "urban/conc_clean2",
+        "wall": "vaccinecore/metal_panelwall_001",
+        "roof": "vaccine/dys_metalroof"
+      }
+    },
+    {
+      "id": "plaza_west_pylon",
+      "style": "pylon",
+      "base": [-896, -256],
+      "size": [256, 512],
+      "height": 512,
+      "floors": 4,
+      "roof_access": true,
+      "materials": {
+        "floor": "twincannon/concretefloor009a_fixed",
+        "wall": "vaccinecore/metal_panelwall_001",
+        "roof": "vaccine/dys_metalroof"
+      }
+    },
+    {
+      "id": "plaza_east_pylon",
+      "style": "pylon",
+      "base": [640, -256],
+      "size": [256, 512],
+      "height": 512,
+      "floors": 4,
+      "roof_access": true,
+      "materials": {
+        "floor": "twincannon/concretefloor009a_fixed",
+        "wall": "vaccinecore/metal_panelwall_001",
+        "roof": "vaccine/dys_metalroof"
+      }
+    },
+    {
+      "id": "plaza_north_kiosk",
+      "style": "kiosk",
+      "base": [-128, 384],
+      "size": [256, 128],
+      "height": 256,
+      "floors": 2,
+      "roof_access": true,
+      "materials": {
+        "floor": "urban/conc_clean2",
+        "wall": "twincannon/dys_office/office_wall2",
+        "roof": "vaccine/dys_metalroof"
+      }
+    },
+    {
+      "id": "plaza_south_kiosk",
+      "style": "kiosk",
+      "base": [-128, -512],
+      "size": [256, 128],
+      "height": 256,
+      "floors": 2,
+      "roof_access": true,
+      "materials": {
+        "floor": "urban/conc_clean2",
+        "wall": "urban/dys_urban_chipboard_04",
+        "roof": "vaccine/dys_metalroof"
+      }
+    },
+    {
+      "id": "northwest_overlook",
+      "style": "block",
+      "base": [-2304, 1408],
+      "size": [512, 384],
+      "height": 512,
+      "floors": 4,
+      "roof_access": true,
+      "materials": {
+        "floor": "urban/conc_clean2",
+        "wall": "twincannon/dys_office/office_wall2",
+        "roof": "vaccine/dys_metalroof"
+      }
+    },
+    {
+      "id": "northeast_overlook",
+      "style": "block",
+      "base": [1792, 1408],
+      "size": [512, 384],
+      "height": 512,
+      "floors": 4,
+      "roof_access": true,
+      "materials": {
+        "floor": "twincannon/concretefloor009a_fixed",
+        "wall": "urban/dys_urban_chipboard_04",
+        "roof": "vaccine/dys_metalroof"
+      }
+    },
+    {
+      "id": "southwest_service",
+      "style": "service",
+      "base": [-2304, -1920],
+      "size": [768, 384],
+      "height": 256,
+      "floors": 2,
+      "roof_access": true,
+      "materials": {
+        "floor": "twincannon/concretefloor009a_fixed",
+        "wall": "twincannon/concretefloor009a_fixed",
+        "roof": "vaccine/dys_metalroof"
+      }
+    },
+    {
+      "id": "southeast_service",
+      "style": "service",
+      "base": [1536, -1920],
+      "size": [768, 384],
+      "height": 256,
+      "floors": 2,
+      "roof_access": true,
+      "materials": {
+        "floor": "twincannon/concretefloor009a_fixed",
+        "wall": "twincannon/concretefloor009a_fixed",
+        "roof": "vaccine/dys_metalroof"
+      }
+    },
+    {
+      "id": "northwest_corner_stack",
+      "style": "stack",
+      "base": [-896, 896],
+      "size": [256, 256],
+      "height": 640,
+      "floors": 5,
+      "roof_access": true,
+      "materials": {
+        "floor": "urban/conc_clean2",
+        "wall": "vaccinecore/metal_panelwall_001",
+        "roof": "vaccine/dys_metalroof"
+      }
+    },
+    {
+      "id": "northeast_corner_stack",
+      "style": "stack",
+      "base": [640, 896],
+      "size": [256, 256],
+      "height": 640,
+      "floors": 5,
+      "roof_access": true,
+      "materials": {
+        "floor": "urban/conc_clean2",
+        "wall": "vaccinecore/metal_panelwall_001",
+        "roof": "vaccine/dys_metalroof"
+      }
+    },
+    {
+      "id": "southwest_corner_stack",
+      "style": "stack",
+      "base": [-896, -1152],
+      "size": [256, 256],
+      "height": 512,
+      "floors": 4,
+      "roof_access": true,
+      "materials": {
+        "floor": "urban/conc_clean2",
+        "wall": "vaccinecore/metal_panelwall_001",
+        "roof": "vaccine/dys_metalroof"
+      }
+    },
+    {
+      "id": "southeast_corner_stack",
+      "style": "stack",
+      "base": [640, -1152],
+      "size": [256, 256],
+      "height": 512,
+      "floors": 4,
+      "roof_access": true,
+      "materials": {
+        "floor": "urban/conc_clean2",
+        "wall": "vaccinecore/metal_panelwall_001",
+        "roof": "vaccine/dys_metalroof"
+      }
+    }
+  ],
+  "objectives": [
+    {
+      "type": "datacore",
+      "position": [0, 0, 0]
+    }
+  ],
+  "spawns": {
+    "corp": [[-1536, 0, -32], [-1664, 256, -32], [-1664, -256, -32], [-1536, 384, -32]],
+    "punk": [[1536, 0, -32], [1664, 256, -32], [1664, -256, -32], [1536, -384, -32]]
+  },
+  "props": [],
+  "entities": [
+    {
+      "classname": "env_cubemap",
+      "origin": [0, 0, 192]
+    },
+    {
+      "classname": "env_cubemap",
+      "origin": [-1536, 0, 192]
+    },
+    {
+      "classname": "env_cubemap",
+      "origin": [1536, 0, 192]
+    },
+    {
+      "classname": "env_cubemap",
+      "origin": [0, 1152, 192]
+    },
+    {
+      "classname": "env_cubemap",
+      "origin": [0, -1152, 192]
+    }
+  ]
+}

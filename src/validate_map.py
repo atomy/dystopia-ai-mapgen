@@ -8,8 +8,17 @@ from __future__ import annotations
 import re
 from typing import Any
 
+from layout_rules import Scene
+from model_placement_rules import ModelPlacementRule, get_model_placement_rule, resolve_prop_origin
+from spawn_layout import FLOOR_THICKNESS, FLOOR_Z, SPAWN_FLOOR_Z, resolve_spawn_positions
+
 
 REQUIRED_TOP_LEVEL = ["versioninfo", "visgroups", "viewsettings", "world", "cameras", "cordon"]
+SCENE_BOUNDS_PADDING = 256  # Keep in sync with scene_to_vmf.ARENA_PADDING.
+DEFAULT_PROP_SPAWN_PADDING = 96
+DEFAULT_PROP_SPAWN_MAX_DELTA_Z = 96
+PURPOSE_SPAWN_PADDING = 192
+PURPOSE_SPAWN_MAX_DELTA_Z = 160
 
 
 def _parse_vmf_sections(text: str) -> list[tuple[str, int]]:
@@ -89,6 +98,167 @@ def validate_vmf_text(text: str) -> list[str]:
         errors.append(f"Unbalanced braces: difference {open_braces}")
 
     return errors
+
+
+def _scene_reference_bounds(scene: Scene) -> tuple[int, int, int, int]:
+    """
+    Return arena bounds inferred from the authored layout, excluding props.
+
+    Large skyline props should not influence these bounds because we validate
+    them against the playable area rather than letting them stretch it.
+    """
+    xs: list[int] = []
+    ys: list[int] = []
+
+    for district in scene.districts:
+        xs.extend([district.bounds.x_min, district.bounds.x_max])
+        ys.extend([district.bounds.y_min, district.bounds.y_max])
+
+    for street in scene.streets:
+        half_width = street.width // 2
+        for x, y in street.path:
+            xs.extend([x - half_width, x + half_width])
+            ys.extend([y - half_width, y + half_width])
+
+    for building in scene.buildings:
+        xs.extend([building.base[0], building.base[0] + building.size[0]])
+        ys.extend([building.base[1], building.base[1] + building.size[1]])
+
+    for x, y, _z in scene.spawns.corp + scene.spawns.punk:
+        xs.append(x)
+        ys.append(y)
+
+    for objective in scene.objectives:
+        xs.append(objective.position[0])
+        ys.append(objective.position[1])
+
+    for entity in scene.entities:
+        xs.append(entity.origin[0])
+        ys.append(entity.origin[1])
+
+    if not xs or not ys:
+        return (-1024, -1024, 1024, 1024)
+
+    return (
+        min(xs) - SCENE_BOUNDS_PADDING,
+        min(ys) - SCENE_BOUNDS_PADDING,
+        max(xs) + SCENE_BOUNDS_PADDING,
+        max(ys) + SCENE_BOUNDS_PADDING,
+    )
+
+
+def validate_scene_layout(scene: Scene) -> list[str]:
+    """Validate layout-level placement constraints before exporting a VMF."""
+    errors: list[str] = []
+    arena_x_min, arena_y_min, arena_x_max, arena_y_max = _scene_reference_bounds(scene)
+    arena_bounds = (arena_x_min, arena_y_min, arena_x_max, arena_y_max)
+    building_boxes = [(b.base, b.size) for b in scene.buildings if b.height > 0]
+    resolved_spawns = (
+        resolve_spawn_positions(scene.spawns.corp, 1, arena_bounds, building_boxes)
+        + resolve_spawn_positions(scene.spawns.punk, 2, arena_bounds, building_boxes)
+    )
+    floor_top_z = FLOOR_Z + FLOOR_THICKNESS
+
+    for prop in scene.props:
+        rule = get_model_placement_rule(prop.model)
+        x, y, z = resolve_prop_origin(prop.model, prop.origin)
+
+        if rule is not None and rule.min_z is not None and z < rule.min_z:
+            errors.append(
+                f"Prop {prop.id} ({prop.model}) is below its minimum placement z "
+                f"({z} < {rule.min_z}) for {rule.category} models"
+            )
+
+        border_distance = min(x - arena_x_min, arena_x_max - x, y - arena_y_min, arena_y_max - y)
+        if rule is not None and rule.border_padding and border_distance < rule.border_padding:
+            errors.append(
+                f"Prop {prop.id} ({prop.model}) is too close to the arena boundary "
+                f"({border_distance} < {rule.border_padding}) for {rule.category} models"
+            )
+
+        purpose_lower = (prop.purpose or "").lower()
+        purpose_spawn_padding = _purpose_spawn_padding(purpose_lower)
+        purpose_spawn_delta_z = PURPOSE_SPAWN_MAX_DELTA_Z if purpose_spawn_padding else 0
+
+        spawn_padding = max(
+            DEFAULT_PROP_SPAWN_PADDING,
+            purpose_spawn_padding,
+            rule.spawn_padding if rule is not None else 0,
+        )
+        spawn_delta_z = max(
+            DEFAULT_PROP_SPAWN_MAX_DELTA_Z,
+            purpose_spawn_delta_z,
+            rule.max_spawn_delta_z if rule is not None else 0,
+        )
+
+        if abs(z - SPAWN_FLOOR_Z) <= spawn_delta_z:
+            for spawn_x, spawn_y, _yaw in resolved_spawns:
+                dx = x - spawn_x
+                dy = y - spawn_y
+                if (dx * dx) + (dy * dy) < (spawn_padding * spawn_padding):
+                    blocker_category = _spawn_blocker_category(rule, purpose_lower)
+                    errors.append(
+                        f"Prop {prop.id} ({prop.model}) is too close to spawn position "
+                        f"({spawn_padding} units clearance required) for {blocker_category} placement"
+                    )
+                    break
+
+        if not _skip_solid_embedding_check(rule):
+            if _point_in_box(x, y, z, arena_x_min, arena_y_min, FLOOR_Z, arena_x_max, arena_y_max, floor_top_z):
+                errors.append(
+                    f"Prop {prop.id} ({prop.model}) resolves inside the floor slab after placement adjustment"
+                )
+                continue
+
+            for building in scene.buildings:
+                if building.height <= 0:
+                    continue
+                bx0, by0 = building.base
+                bx1 = bx0 + building.size[0]
+                by1 = by0 + building.size[1]
+                bz0 = floor_top_z
+                bz1 = floor_top_z + building.height
+                if _point_in_box(x, y, z, bx0, by0, bz0, bx1, by1, bz1):
+                    errors.append(
+                        f"Prop {prop.id} ({prop.model}) resolves inside solid building {building.id} "
+                        f"after placement adjustment"
+                    )
+                    break
+
+    return errors
+
+
+def _spawn_blocker_category(rule: ModelPlacementRule | None, purpose_lower: str) -> str:
+    if rule is not None and rule.category:
+        return rule.category
+    if _purpose_spawn_padding(purpose_lower):
+        return "spawn-purpose"
+    return "ground-level"
+
+
+def _purpose_spawn_padding(purpose_lower: str) -> int:
+    if "spawn" not in purpose_lower:
+        return 0
+    blocking_keywords = ("cover", "crate", "block", "obstacle", "barrier")
+    return PURPOSE_SPAWN_PADDING if any(keyword in purpose_lower for keyword in blocking_keywords) else 0
+
+
+def _point_in_box(
+    x: int,
+    y: int,
+    z: int,
+    x_min: int,
+    y_min: int,
+    z_min: int,
+    x_max: int,
+    y_max: int,
+    z_max: int,
+) -> bool:
+    return x_min <= x <= x_max and y_min <= y <= y_max and z_min <= z <= z_max
+
+
+def _skip_solid_embedding_check(rule: ModelPlacementRule | None) -> bool:
+    return rule is not None and rule.category == "skyline"
 
 
 def validate_writer(writer: Any) -> list[str]:
