@@ -6,3 +6,5 @@ __pycache__/
 *.log
 *.prt
 *.vmf
+dys_ai.vmx
+examples/*.vmf

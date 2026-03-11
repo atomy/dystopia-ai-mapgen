@@ -9,9 +9,13 @@ from statistics import median
 
 FLOOR_Z = -64
 FLOOR_THICKNESS = 32
+# Small offset so building floor/wall bottoms sit above arena floor top (avoids z-fighting).
+Z_FIGHT_OFFSET = 1
 SPAWN_FLOOR_Z = FLOOR_Z + FLOOR_THICKNESS
 SPAWN_CLEARANCE = 128
 ARENA_MARGIN = 64
+# Minimum horizontal distance between spawn pads (avoids overlapping pads).
+MIN_SPAWN_DISTANCE = 128
 
 
 def clamp_to_arena(
@@ -141,7 +145,7 @@ def _build_evenly_spaced_line(
 
     sorted_indices = sorted(range(len(authored_xy)), key=lambda idx: authored_axis[idx])
     sorted_authored_axis = [authored_axis[idx] for idx in sorted_indices]
-    spacing = _dominant_spacing(sorted_authored_axis)
+    spacing = max(MIN_SPAWN_DISTANCE, _dominant_spacing(sorted_authored_axis))
     if spacing <= 0 or (spacing * (len(authored_xy) - 1)) > (axis_max - axis_min):
         return None
 
@@ -203,6 +207,48 @@ def _build_evenly_spaced_line(
     return [position for position in out if position is not None]
 
 
+def _dist_xy(a: tuple[int, int], b: tuple[int, int]) -> float:
+    return ((a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2) ** 0.5
+
+
+def _enforce_min_spawn_distance(
+    positions: list[tuple[int, int, str]],
+    min_dist: int,
+    arena_bounds: tuple[int, int, int, int],
+    building_boxes: list[tuple[tuple[int, int], tuple[int, int]]],
+) -> list[tuple[int, int, str]]:
+    """Move spawn points that are too close so they are at least min_dist apart (xy)."""
+    if len(positions) <= 1:
+        return positions
+    result: list[tuple[int, int, str]] = []
+    for x, y, yaw in positions:
+        nx, ny = x, y
+        for _ in range(20):  # limit iterations
+            too_close: tuple[int, int] | None = None
+            min_gap = float("inf")
+            for ox, oy, _ in result:
+                d = _dist_xy((nx, ny), (ox, oy))
+                if d < min_dist and d < min_gap:
+                    min_gap = d
+                    too_close = (ox, oy)
+            if too_close is None:
+                break
+            dx = nx - too_close[0]
+            dy = ny - too_close[1]
+            if dx == 0 and dy == 0:
+                dy = min_dist
+            else:
+                scale = min_dist / max(1e-6, (dx * dx + dy * dy) ** 0.5)
+                dx = int(round(dx * scale))
+                dy = int(round(dy * scale))
+            nx += dx
+            ny += dy
+            nx, ny = clamp_to_arena(nx, ny, *arena_bounds)
+            nx, ny, _ = move_spawn_out_of_buildings(nx, ny, building_boxes)[:2]
+        result.append((nx, ny, yaw))
+    return result
+
+
 def resolve_spawn_positions(
     positions: list[tuple[int, int, int]],
     team_side: int,
@@ -230,4 +276,4 @@ def resolve_spawn_positions(
             else (arena_x_max - 128, (arena_y_min + arena_y_max) // 2)
         )
         out.append(_resolve_single_spawn_position(fallback[0], fallback[1], arena_bounds, building_boxes))
-    return out
+    return _enforce_min_spawn_distance(out, MIN_SPAWN_DISTANCE, arena_bounds, building_boxes)

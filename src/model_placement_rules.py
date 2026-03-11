@@ -18,6 +18,7 @@ class ModelPlacementRule:
     max_spawn_delta_z: int = 96
     export_z_offset: int = 0
     category: str = "skyline"
+    requires_ceiling: bool = False
 
 
 MODEL_PLACEMENT_RULES: dict[str, ModelPlacementRule] = {
@@ -72,6 +73,10 @@ MODEL_PLACEMENT_RULES: dict[str, ModelPlacementRule] = {
     "models/props/dys_vendingmachine01d.mdl": ModelPlacementRule(
         export_z_offset=32,
         category="ground_fixture",
+    ),
+    "models/props_wasteland/prison_lamp001b.mdl": ModelPlacementRule(
+        requires_ceiling=True,
+        category="ceiling_fixture",
     ),
 }
 

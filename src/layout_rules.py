@@ -49,6 +49,10 @@ class Street:
     width: int
 
 
+# Reusable enterable building archetypes. "solid" = single solid block (legacy).
+BUILDING_ARCHETYPES = ("solid", "spawn_block", "small_shop", "office_midrise", "warehouse")
+
+
 @dataclass
 class Building:
     id: str
@@ -59,6 +63,16 @@ class Building:
     floors: int = 1
     roof_access: bool = False
     materials: dict[str, str] = field(default_factory=dict)
+    # Enterable building kit: archetype drives geometry; optional knobs override defaults.
+    archetype: str = "solid"  # one of BUILDING_ARCHETYPES
+    wall_thickness: int = 32
+    entrance_sides: list[str] = field(default_factory=list)  # e.g. ["x_min", "y_max"]; empty = archetype default
+    floor_height: int | None = None  # per-storey height; None = height // floors
+    window_spacing: int | None = None  # grid-aligned window spacing along walls; None = archetype default
+    glass: bool = True  # add glass brushes in window openings when enterable
+
+    def is_enterable(self) -> bool:
+        return self.archetype != "solid"
 
 
 @dataclass
@@ -135,6 +149,12 @@ class Scene:
                     "floors": b.floors,
                     "roof_access": b.roof_access,
                     "materials": b.materials,
+                    "archetype": b.archetype,
+                    "wall_thickness": b.wall_thickness,
+                    "entrance_sides": list(b.entrance_sides),
+                    "floor_height": b.floor_height,
+                    "window_spacing": b.window_spacing,
+                    "glass": b.glass,
                 }
                 for b in self.buildings
             ],
@@ -210,6 +230,12 @@ def scene_from_json_dict(data: dict[str, Any]) -> Scene:
             floors=int(b.get("floors", 1)),
             roof_access=bool(b.get("roof_access", False)),
             materials={str(k): str(v) for k, v in b.get("materials", {}).items()},
+            archetype=str(b.get("archetype", "solid")),
+            wall_thickness=int(b.get("wall_thickness", 32)),
+            entrance_sides=list(b.get("entrance_sides", [])),
+            floor_height=int(b["floor_height"]) if b.get("floor_height") is not None else None,
+            window_spacing=int(b["window_spacing"]) if b.get("window_spacing") is not None else None,
+            glass=bool(b.get("glass", True)),
         )
         for b in data.get("buildings", [])
     ]

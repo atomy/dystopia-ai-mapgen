@@ -4,22 +4,20 @@ Convert Scene to VMF: build world solids and Dystopia entities from layout.
 
 from __future__ import annotations
 
-from layout_rules import EntityHint, PropPlacement, Scene
-from model_placement_rules import resolve_prop_origin
+from layout_rules import Building, EntityHint, PropPlacement, Scene
+from model_placement_rules import get_model_placement_rule, resolve_prop_origin
 from vmf_writer import VmfWriter
-from vmf_primitives import add_box, add_sky_shell
+from vmf_primitives import add_box, add_sky_shell, DEFAULT_FLOOR_MATERIAL
+from building_emitter import get_enterable_window_bands, emit_building, ROOF_SLAB_THICKNESS
 from dystopia_entities import (
     add_dys_spawn,
     add_dys_spawn_point,
     TEAM_CORP,
     TEAM_PUNK,
 )
-from spawn_layout import FLOOR_THICKNESS, FLOOR_Z, SPAWN_FLOOR_Z, resolve_spawn_positions
+from spawn_layout import FLOOR_THICKNESS, FLOOR_Z, SPAWN_FLOOR_Z, Z_FIGHT_OFFSET, resolve_spawn_positions
 
 
-MAT_FLOOR = "urban/conc_clean2"
-MAT_WALL = "vaccinecore/metal_panelwall_001"
-MAT_ROOF = "vaccine/dys_metalroof"
 SKY_MATERIAL = "TOOLS/TOOLSSKYBOX"
 SKY_WALL_HEIGHT = 1152
 SKY_THICKNESS = 64
@@ -45,6 +43,32 @@ def _add_prop(writer: VmfWriter, prop: PropPlacement) -> None:
         angles=_angles(prop.angles),
         solid="6",
     )
+
+
+def has_ceiling_above(
+    buildings: list[Building],
+    x: int,
+    y: int,
+    z: int,
+    base_z: float,
+) -> bool:
+    """Return True if (x, y) is under a building ceiling at or above z."""
+    for b in buildings:
+        if b.height <= 0:
+            continue
+        x0, y0 = float(b.base[0]), float(b.base[1])
+        x1 = x0 + b.size[0]
+        y1 = y0 + b.size[1]
+        if not (x0 <= x <= x1 and y0 <= y <= y1):
+            continue
+        z1 = base_z + b.height
+        if b.is_enterable():
+            ceiling_underside = z1 - ROOF_SLAB_THICKNESS
+        else:
+            ceiling_underside = z1
+        if ceiling_underside >= z:
+            return True
+    return False
 
 
 def _add_entity_hint(writer: VmfWriter, entity: EntityHint) -> None:
@@ -124,45 +148,25 @@ def scene_to_vmf(scene: Scene) -> VmfWriter:
     )
 
     # Arena floor.
-    add_box(writer, arena_x_min, arena_y_min, FLOOR_Z, arena_width, arena_depth, FLOOR_THICKNESS, MAT_FLOOR)
+    add_box(writer, arena_x_min, arena_y_min, FLOOR_Z, arena_width, arena_depth, FLOOR_THICKNESS, DEFAULT_FLOOR_MATERIAL)
 
-    # Buildings as boxes (skip plaza with height 0)
+    # Buildings: solid block or enterable archetype (raised by Z_FIGHT_OFFSET to avoid z-fighting with arena floor)
+    base_z = FLOOR_Z + FLOOR_THICKNESS + Z_FIGHT_OFFSET
+    # Collect window bands from enterable buildings so solid buildings can be clipped and not block windows
+    all_window_bands: list[tuple[float, float, float, float, float, float]] = []
     for b in scene.buildings:
-        if b.height <= 0:
-            continue
-        x, y = b.base
-        w, d = b.size
-        wall_material = b.materials.get("wall", MAT_WALL)
-        roof_material = b.materials.get("roof", wall_material or MAT_ROOF)
-        floor_material = b.materials.get("floor", MAT_FLOOR)
-
-        # Use a single brush with per-face materials so roofs/floors inherit their
-        # own materials without creating overlapping coplanar cap brushes.
-        add_box(
-            writer,
-            x,
-            y,
-            FLOOR_Z + FLOOR_THICKNESS,
-            w,
-            d,
-            b.height,
-            wall_material,
-            face_materials=[
-                roof_material,
-                floor_material,
-                wall_material,
-                wall_material,
-                wall_material,
-                wall_material,
-            ],
-        )
+        if b.is_enterable():
+            all_window_bands.extend(get_enterable_window_bands(b, base_z))
+    for b in scene.buildings:
+        emit_building(writer, b, base_z, window_bands=all_window_bands if not b.is_enterable() else None)
 
     # Dystopia entities: one spawn container + points per team.
     # Spawns must be inside the arena (sky shell) and in empty space (not inside solid building brushes).
     spawn_floor = SPAWN_FLOOR_Z
     corp_spawns = scene.spawns.corp if scene.spawns.corp else [(-768, 0, spawn_floor)]
     punk_spawns = scene.spawns.punk if scene.spawns.punk else [(768, 0, spawn_floor)]
-    building_boxes = [(b.base, b.size) for b in scene.buildings if b.height > 0]
+    # Only solid buildings block spawn placement; enterable buildings may contain spawns.
+    building_boxes = [(b.base, b.size) for b in scene.buildings if b.height > 0 and not b.is_enterable()]
     arena_bounds = (arena_x_min, arena_y_min, arena_x_max, arena_y_max)
     corp_xy = resolve_spawn_positions(corp_spawns, 1, arena_bounds, building_boxes)
     punk_xy = resolve_spawn_positions(punk_spawns, 2, arena_bounds, building_boxes)
@@ -189,6 +193,11 @@ def scene_to_vmf(scene: Scene) -> VmfWriter:
     writer.add_entity("light", origin="0 0 384", _light="255 255 255 350")
 
     for prop in scene.props:
+        rule = get_model_placement_rule(prop.model)
+        if rule and rule.requires_ceiling:
+            origin = resolve_prop_origin(prop.model, prop.origin)
+            if not has_ceiling_above(scene.buildings, origin[0], origin[1], origin[2], base_z):
+                continue
         _add_prop(writer, prop)
 
     for entity in scene.entities:

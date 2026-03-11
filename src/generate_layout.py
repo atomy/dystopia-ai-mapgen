@@ -51,7 +51,7 @@ def generate_mvp_arena() -> Scene:
     ]
 
     # Corp spawn building (west), Punk spawn building (east), central plaza, objective tower (center), rooftop bypass
-    # Building: base (x,y), size (w,d), height. base is min corner in X,Y.
+    # Enterable archetypes: spawn_block, small_shop, office_midrise, warehouse. solid = legacy solid block.
     buildings = [
         Building(
             id="corp_spawn_building",
@@ -66,6 +66,8 @@ def generate_mvp_arena() -> Scene:
                 "wall": "twincannon/dys_office/office_wall2",
                 "roof": "vaccine/dys_metalroof",
             },
+            archetype="spawn_block",
+            entrance_sides=["x_max"],
         ),
         Building(
             id="punk_spawn_building",
@@ -80,6 +82,8 @@ def generate_mvp_arena() -> Scene:
                 "wall": "urban/dys_urban_chipboard_04",
                 "roof": "vaccine/dys_metalroof",
             },
+            archetype="spawn_block",
+            entrance_sides=["x_min"],
         ),
         Building(
             id="plaza",
@@ -103,6 +107,8 @@ def generate_mvp_arena() -> Scene:
                 "wall": "vaccinecore/metal_panelwall_001",
                 "roof": "vaccine/dys_metalroof",
             },
+            archetype="office_midrise",
+            entrance_sides=["x_min", "x_max"],
         ),
         Building(
             id="rooftop_bypass_north",
@@ -138,31 +144,29 @@ def generate_mvp_arena() -> Scene:
         Objective(type="datacore", position=(0, 0, 256)),
     ]
 
-    # Spawn positions: corp west, punk east; Z = floor + small offset
+    # Spawn positions: corp west, punk east; at least 6 per team for validation
     spawn_floor_z = -64
     spawns = Spawns(
-        corp=[(-768, 0, spawn_floor_z), (-768, 128, spawn_floor_z)],
-        punk=[(768, 0, spawn_floor_z), (768, -128, spawn_floor_z)],
+        corp=[
+            (-768, -192, spawn_floor_z),
+            (-768, -64, spawn_floor_z),
+            (-768, 64, spawn_floor_z),
+            (-768, 192, spawn_floor_z),
+            (-768, -128, spawn_floor_z),
+            (-768, 128, spawn_floor_z),
+        ],
+        punk=[
+            (768, -192, spawn_floor_z),
+            (768, -64, spawn_floor_z),
+            (768, 64, spawn_floor_z),
+            (768, 192, spawn_floor_z),
+            (768, -128, spawn_floor_z),
+            (768, 128, spawn_floor_z),
+        ],
     )
 
-    props = [
-        PropPlacement(
-            id="corp_spawn_lamp",
-            model="models/props_wasteland/prison_lamp001b.mdl",
-            origin=(-832, 0, 96),
-            angles=(0, 0, 0),
-            zone="corp_plaza",
-            purpose="spawn_lighting",
-        ),
-        PropPlacement(
-            id="punk_spawn_lamp",
-            model="models/props_wasteland/prison_lamp001b.mdl",
-            origin=(832, 0, 96),
-            angles=(0, 180, 0),
-            zone="corp_plaza",
-            purpose="spawn_lighting",
-        ),
-    ]
+    # Ceiling-attached lamps omitted in open plazas; add under buildings if desired.
+    props: list[PropPlacement] = []
 
     entities = [
         EntityHint(

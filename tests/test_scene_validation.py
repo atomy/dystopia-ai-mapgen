@@ -96,7 +96,31 @@ def test_blocks_spawn_blocking_prop_on_spawn_pad() -> None:
     assert any("too close to spawn position" in error for error in errors), errors
 
 
-def test_allows_overhead_prop_near_spawn_when_vertically_clear() -> None:
+def test_ceiling_prop_without_ceiling_fails_validation() -> None:
+    """Prison lamp (ceiling-attached) in open space must fail validation."""
+    scene = _base_scene(
+        PropPlacement(
+            id="floating_lamp",
+            model="models/props_wasteland/prison_lamp001b.mdl",
+            origin=(-832, 0, 96),
+            purpose="spawn_lighting",
+        )
+    )
+    errors = validate_scene_layout(scene)
+    assert any("requires a ceiling" in error for error in errors), errors
+
+
+def test_allows_overhead_prop_near_spawn_when_under_ceiling() -> None:
+    """Ceiling lamp near spawn is allowed when a building ceiling exists above it."""
+    # Building with ceiling above (-832, 0): base_z=-31, height=160 -> ceiling_underside=97 >= 96
+    building = Building(
+        id="lamp_ceiling",
+        style="block",
+        base=(-896, -64),
+        size=(128, 128),
+        height=160,
+        archetype="solid",
+    )
     scene = _base_scene(
         PropPlacement(
             id="spawn_lamp",
@@ -105,6 +129,7 @@ def test_allows_overhead_prop_near_spawn_when_vertically_clear() -> None:
             purpose="spawn_lighting",
         )
     )
+    scene.buildings.append(building)
     errors = validate_scene_layout(scene)
     assert not errors, errors
 
@@ -142,6 +167,29 @@ def test_blocks_vending_machine_inside_generated_platform() -> None:
     )
     errors = validate_scene_layout(scene)
     assert any("inside solid building" in error for error in errors), errors
+
+
+def test_allows_prop_inside_enterable_building() -> None:
+    scene = _base_scene(
+        PropPlacement(
+            id="interior_vendor",
+            model="models/props/dys_vendingmachine01c.mdl",
+            origin=(320, 320, 48),
+            purpose="landmark",
+        )
+    )
+    scene.buildings.append(
+        Building(
+            id="test_enterable",
+            style="block",
+            base=(256, 256),
+            size=(256, 256),
+            height=128,
+            archetype="spawn_block",
+        )
+    )
+    errors = validate_scene_layout(scene)
+    assert not any("inside solid building" in error for error in errors), errors
 
 
 def test_requires_six_spawn_pads_per_team() -> None:

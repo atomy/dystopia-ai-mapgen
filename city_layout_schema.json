@@ -55,10 +55,17 @@
               "floor": { "type": "string" },
               "wall": { "type": "string" },
               "trim": { "type": "string" },
-              "roof": { "type": "string" }
+              "roof": { "type": "string" },
+              "glass": { "type": "string" }
             },
             "additionalProperties": { "type": "string" }
-          }
+          },
+          "archetype": { "type": "string", "enum": ["solid", "spawn_block", "small_shop", "office_midrise", "warehouse"] },
+          "wall_thickness": { "type": "integer", "minimum": 16 },
+          "entrance_sides": { "type": "array", "items": { "type": "string", "enum": ["x_min", "x_max", "y_min", "y_max"] } },
+          "floor_height": { "type": "integer", "minimum": 96 },
+          "window_spacing": { "type": "integer", "minimum": 64 },
+          "glass": { "type": "boolean" }
         }
       }
     },

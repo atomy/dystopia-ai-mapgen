@@ -10,7 +10,8 @@ from typing import Any
 
 from layout_rules import Scene
 from model_placement_rules import ModelPlacementRule, get_model_placement_rule, resolve_prop_origin
-from spawn_layout import FLOOR_THICKNESS, FLOOR_Z, SPAWN_FLOOR_Z, resolve_spawn_positions
+from scene_to_vmf import has_ceiling_above
+from spawn_layout import FLOOR_THICKNESS, FLOOR_Z, SPAWN_FLOOR_Z, Z_FIGHT_OFFSET, resolve_spawn_positions
 
 
 REQUIRED_TOP_LEVEL = ["versioninfo", "visgroups", "viewsettings", "world", "cameras", "cordon"]
@@ -152,6 +153,20 @@ def validate_scene_layout(scene: Scene) -> list[str]:
     """Validate layout-level placement constraints before exporting a VMF."""
     errors: list[str] = []
 
+    for building in scene.buildings:
+        if building.is_enterable():
+            min_interior = 2 * building.wall_thickness
+            if building.size[0] < min_interior or building.size[1] < min_interior:
+                errors.append(
+                    f"Enterable building {building.id} ({building.archetype}) footprint too small: "
+                    f"size {building.size} must allow interior (min {min_interior} per axis)"
+                )
+            if building.floor_height is not None and building.floor_height < 96:
+                errors.append(
+                    f"Enterable building {building.id} floor_height must be at least 96 "
+                    f"(got {building.floor_height})"
+                )
+
     if len(scene.spawns.corp) < MIN_TEAM_SPAWNS:
         errors.append(
             f"Corp team must define at least {MIN_TEAM_SPAWNS} spawn pads "
@@ -165,16 +180,24 @@ def validate_scene_layout(scene: Scene) -> list[str]:
 
     arena_x_min, arena_y_min, arena_x_max, arena_y_max = _scene_reference_bounds(scene)
     arena_bounds = (arena_x_min, arena_y_min, arena_x_max, arena_y_max)
-    building_boxes = [(b.base, b.size) for b in scene.buildings if b.height > 0]
+    # Only solid buildings block spawn placement; enterable buildings may contain spawns/interiors.
+    building_boxes = [(b.base, b.size) for b in scene.buildings if b.height > 0 and not b.is_enterable()]
     resolved_spawns = (
         resolve_spawn_positions(scene.spawns.corp, 1, arena_bounds, building_boxes)
         + resolve_spawn_positions(scene.spawns.punk, 2, arena_bounds, building_boxes)
     )
     floor_top_z = FLOOR_Z + FLOOR_THICKNESS
+    base_z = FLOOR_Z + FLOOR_THICKNESS + Z_FIGHT_OFFSET
 
     for prop in scene.props:
         rule = get_model_placement_rule(prop.model)
         x, y, z = resolve_prop_origin(prop.model, prop.origin)
+
+        if rule is not None and rule.requires_ceiling and not has_ceiling_above(scene.buildings, x, y, z, base_z):
+            errors.append(
+                f"Prop {prop.id} ({prop.model}) requires a ceiling above it but is in open space "
+                f"(no building ceiling at origin {x} {y} {z})"
+            )
 
         if rule is not None and rule.min_z is not None and z < rule.min_z:
             errors.append(
@@ -224,13 +247,13 @@ def validate_scene_layout(scene: Scene) -> list[str]:
                 continue
 
             for building in scene.buildings:
-                if building.height <= 0:
+                if building.height <= 0 or building.is_enterable():
                     continue
                 bx0, by0 = building.base
                 bx1 = bx0 + building.size[0]
                 by1 = by0 + building.size[1]
-                bz0 = floor_top_z
-                bz1 = floor_top_z + building.height
+                bz0 = floor_top_z + Z_FIGHT_OFFSET
+                bz1 = bz0 + building.height
                 if _point_in_box(x, y, z, bx0, by0, bz0, bx1, by1, bz1):
                     errors.append(
                         f"Prop {prop.id} ({prop.model}) resolves inside solid building {building.id} "
@@ -294,7 +317,7 @@ def validate_writer(writer: Any) -> list[str]:
             if eid_int in ids:
                 errors.append(f"Duplicate entity id {eid_int}")
             ids.add(eid_int)
-        if e.get("classname") == "dys_jackpoint" and "solid" in e:
+        if "solid" in e and isinstance(e.get("solid"), dict):
             for side in e["solid"]["sides"]:
                 if side["id"] in ids:
                     errors.append(f"Duplicate brush-entity side id {side['id']}")
