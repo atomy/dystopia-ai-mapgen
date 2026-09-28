@@ -64,7 +64,7 @@ The user also gave some guidance during the session:
 - A hint that the jack-in point was missing something. The cause was that brush entities need an `origin` keyvalue.
 
 **Approach**
-- **New generator:** written from scratch in Python in `maps/dys_blackice_src/`. It has a leak-proof box-CSG shell builder, material and texture-band recipes, dressing kits, the gameplay and cyberspace layers, a 3D skybox, and custom textures drawn with Pillow and compiled with vtex.
+- **New generator:** written from scratch in Python, in [`dys_blackice/`](../../dys_blackice/). It has a leak-proof box-CSG shell builder, material and texture-band recipes, dressing kits, the gameplay and cyberspace layers, a 3D skybox, and custom textures drawn with Pillow and compiled with vtex.
 - **Compile:** Dystopia's own vbsp, vvis and vrad (full vis, `-both -final`), with LDR and HDR cubemaps built in-game.
 - **Verification:** automated in-game sessions driven through `-hijack`, including screenshot tours, walk tests on every stair and route, an objective-chain regression, a cyberspace jack-in test, and a load with only the packed content (loose files hidden).
 
@@ -73,7 +73,7 @@ The user also gave some guidance during the session:
 - **Objectives:** three in sequence. Breach the gate (meatspace override or cyberspace hack), crack the security hub, then crash the BLACK ICE core (shield dropped from cyberspace or by destroying its emitters).
 - **Gameplay systems:** 4 spawn areas that flip as objectives fall, 7 jack-in points, ICE-guarded terminals, turrets and team forcefields.
 - **Release extras:** radar overview, objective guide paths, custom soundscapes, music and a loading screen.
-- **Release package:** `maps/dys_blackice_src/build/release/dys_blackice_v1.0.zip`, with a readme.
+- **Release package:** `dys_blackice_v1.0.zip` (BSP + readme), built locally into `dys_blackice/build/release/` by `release.py zip`.
 
 | | |
 |---|---|
