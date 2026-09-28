@@ -4,7 +4,8 @@ Source for **dys_blackice** ("Black ICE"), a Dystopia objective map. The whole m
 Python scripts: geometry, gameplay logic, cyberspace, dressing, 3D skybox, custom textures and release extras.
 The scripts then compile it with Dystopia's own tools and test it in-game automatically.
 
-See [PLAN.md](PLAN.md) for the design and status, and [README_release.txt](README_release.txt) for the
+See [PLAN.md](PLAN.md) for the design and status, [SESSION_MEMORY.md](SESSION_MEMORY.md) for verified
+Dystopia facts and lessons from the build session, and [README_release.txt](README_release.txt) for the
 player-facing readme that ships with the map.
 
 ## Requirements

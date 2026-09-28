@@ -2,9 +2,10 @@
 
 Generate Dystopia map layouts (JSON) and export them to VMF, then optionally compile to BSP.
 
-![In-game screenshot of a completely AI-generated Dystopia map](doc/benchmark/dys_gpt_5_4_xhigh.png)
+![In-game screenshot of dys_blackice, a completely AI-generated Dystopia map](doc/benchmark/dys_blackice/street.jpg)
 
-*Benchmark runs and more screenshots: [doc/benchmark/README.md](doc/benchmark/README.md).*
+*dys_blackice, built by Claude Opus 5.5 with its own generator in [dys_blackice/](dys_blackice/), not with citygen.
+Benchmark runs and more screenshots: [doc/benchmark/README.md](doc/benchmark/README.md).*
 
 ## How to use the tool chain
 
