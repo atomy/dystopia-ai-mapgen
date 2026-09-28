@@ -43,3 +43,51 @@ In-game screenshots for each benchmark run. Each map was generated from the same
 | dys_opus_4_6_think | ![dys_opus_4_6_think](dys_opus_4_6_think.png) |
 | dys_sonnet_4_6 | ![dys_sonnet_4_6](dys_sonnet_4_6.png) |
 | dys_sonnet_4_6_think | ![dys_sonnet_4_6_think](dys_sonnet_4_6_think.png) |
+| dys_blackice (Opus 5.5, separate run, [see below](#dys_blackice--opus-55-release-quality-run)) | ![dys_blackice](dys_blackice/street.jpg) |
+
+---
+
+## dys_blackice — Opus 5.5 (release-quality run)
+
+This run had a different, harder brief and did **not** use the dystopia_citygen pipeline. It is listed
+separately rather than as a like-for-like comparison with the runs above.
+
+**Prompt**
+
+```
+I want you to build a ready to release dystopia game map, make a plan for yourself how you would conquer this challenge.
+```
+
+The user also gave some guidance during the session:
+- Don't rely on dystopia_citygen; its output was too basic to play.
+- `mp_instantspawn 1` speeds up testing.
+- A hint that the jack-in point was missing something. The cause was that brush entities need an `origin` keyvalue.
+
+**Approach**
+- **New generator:** written from scratch in Python in `maps/dys_blackice_src/`. It has a leak-proof box-CSG shell builder, material and texture-band recipes, dressing kits, the gameplay and cyberspace layers, a 3D skybox, and custom textures drawn with Pillow and compiled with vtex.
+- **Compile:** Dystopia's own vbsp, vvis and vrad (full vis, `-both -final`), with LDR and HDR cubemaps built in-game.
+- **Verification:** automated in-game sessions driven through `-hijack`, including screenshot tours, walk tests on every stair and route, an objective-chain regression, a cyberspace jack-in test, and a load with only the packed content (loose files hidden).
+
+**Result:** `maps/dys_blackice.bsp` v1.0 (23 MB, all content packed inside):
+- **Map:** rainy neon megacity at night. Metro station, then a street market, then a corporate plaza, a tower lobby, a server hall and a core vault, plus a 5-node cyberspace.
+- **Objectives:** three in sequence. Breach the gate (meatspace override or cyberspace hack), crack the security hub, then crash the BLACK ICE core (shield dropped from cyberspace or by destroying its emitters).
+- **Gameplay systems:** 4 spawn areas that flip as objectives fall, 7 jack-in points, ICE-guarded terminals, turrets and team forcefields.
+- **Release extras:** radar overview, objective guide paths, custom soundscapes, music and a loading screen.
+- **Release package:** `maps/dys_blackice_src/build/release/dys_blackice_v1.0.zip`, with a readme.
+
+| | |
+|---|---|
+| ![street](dys_blackice/street.jpg) | ![plaza](dys_blackice/plaza.jpg) |
+| Market street and the Kuroda tower | Kuroda Plaza (tower continues into the 3D skybox) |
+| ![gate](dys_blackice/gate.jpg) | ![lobby](dys_blackice/lobby.jpg) |
+| Obj 1: security gate and guard posts | Tower lobby mezzanine |
+| ![server hall](dys_blackice/server_hall.jpg) | ![core vault](dys_blackice/core_vault.jpg) |
+| Server hall | Obj 3: BLACK ICE core vault |
+| ![cyberspace](dys_blackice/cyberspace.jpg) | ![metro](dys_blackice/metro.jpg) |
+| Cyberspace entry node | Punk HQ: abandoned metro station |
+| ![arcade](dys_blackice/arcade.jpg) | ![alley](dys_blackice/alley.jpg) |
+| NetExcess Arcade (forward Punk spawn) | North alley fire escape (rooftop flank) |
+
+Loading screen:
+
+![loading screen](dys_blackice/loading_screen.jpg)
