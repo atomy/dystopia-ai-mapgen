@@ -87,6 +87,11 @@ AIR = {
     # --- cyberspace hall (opaque shell; glowing layers are entities)
     "cy_hall": dict(floor=T("cyberspace/wall_squaresolid"), ceil=T("cyberspace/t_cyspwall1_black", scale=0.5),
                     walls=[(0, None, flat("cyberspace/cube_purple", scale=0.5))]),
+    # decker spawn pods outside the hall, and the dark ducts their tubes run through
+    "cy_pod": dict(floor=T("cyberspace/wall_squaresolid"), ceil=T("cyberspace/cube_blue"),
+                   walls=[(0, None, flat("cyberspace/cube_blue"))]),
+    "cy_duct": dict(floor=T("cyberspace/t_cyspwall1_black", scale=0.5), ceil=T("cyberspace/t_cyspwall1_black", scale=0.5),
+                    walls=[(0, None, flat("cyberspace/t_cyspwall1_black", scale=0.5))]),
 }
 
 # ----------------------------------------------------------------------------- facades

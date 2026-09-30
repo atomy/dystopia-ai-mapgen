@@ -160,12 +160,12 @@ def lobby(b):
     for (x, y, yaw) in [(720, 640, 0), (870, 640, 180), (720, -640, 0), (870, -640, 180)]:
         kit.prop(m, "models/spire/s_chair1b.mdl", x, y, 192, yaw=yaw, solid=6)
     # security hub: node screens, desks, sign, alarm light
-    for (x, mat) in [(1216, "vaccinert/dys_camnode"), (1312, "vaccinert/dys_turretnode"),
-                     (1504, "vaccinert/dys_mainnode"), (1600, "vaccinert/dys_corenode")]:
+    for (x, mat) in [(1216, "vaccinert/dys_camnode"), (1312, "vaccinert/dys_turretnode")]:
         panel(m, x, 1150, 240, 320, "-y", 80, mat, depth=2)
-    for x in (1248, 1568):
-        kit.prop(m, "models/props_wasteland/controlroom_desk001a.mdl", x, 1080, 192, yaw=270, solid=6)
-        kit.prop(m, "models/props_wasteland/controlroom_monitor001a.mdl", x, 1090, 226, yaw=270, solid=0)
+    for (y, mat) in [(848, "vaccinert/dys_mainnode"), (1088, "vaccinert/dys_corenode")]:   # east wall
+        panel(m, 1662, y, 240, 320, "-x", 80, mat, depth=2)
+    kit.prop(m, "models/props_wasteland/controlroom_desk001a.mdl", 1248, 1080, 192, yaw=270, solid=6)
+    kit.prop(m, "models/props_wasteland/controlroom_monitor001a.mdl", 1248, 1090, 226, yaw=270, solid=0)
     panel(m, 1408, 766, 332, 396, "-y", 128, "vaccine2/vac_sign9", depth=2)
     kit.light(m, 1408, 740, 360, color=(120, 200, 255), bright=135)
     for x in (1280, 1536):
@@ -223,7 +223,7 @@ def server_vault(b):
     # rack models by the entrance + cooling tank
     for y in (-560, 560):
         kit.prop(m, "models/twincannon/dys_serverrack.mdl", 2600, y, F, yaw=0 if y < 0 else 180, solid=6)
-    kit.prop(m, "models/props_wasteland/horizontalcoolingtank04.mdl", 3400, 600, F + 61, yaw=0, solid=6, on_floor=False)
+    kit.prop(m, "models/props_wasteland/horizontalcoolingtank04.mdl", 3520, 580, F + 61, yaw=0, solid=6, on_floor=False)
 
     # ---------------- vault
     cx, cy = 4128, 0
@@ -270,3 +270,38 @@ def server_vault(b):
         kit.prop(m, "models/props_wasteland/controlroom_desk001a.mdl", 5000, y, -128, yaw=180, solid=6)
     for (x, y) in [(4700, -200), (4700, 200), (4950, 0)]:
         light_panel(m, x, y, 128, bright=270)
+
+
+# ============================================================================ alternative routes
+
+def routes(b):
+    """North service route to the hub and the cooling route from the hub to the vault."""
+    m: VMF = b.m
+    # north service door: hazard frame + sign on the plaza side, lights up the stair hall
+    for y in (1016, 1152):
+        m.detail(box(440, y, 0, 448, y + 8, 136, Tex("props/hazardstrip001a", scale=0.25)))
+    m.detail(box(440, 1016, 128, 448, 1160, 136, Tex("props/hazardstrip001a", scale=0.25)))
+    panel(m, 448, 1088, 150, 182, "-x", 128, "vaccine2/vac_sign9", depth=2)         # SECURITY
+    for x in (640, 832, 1024):
+        kit.light(m, x, 1088, 120 + (x - 704) // 2 if x > 704 else 110, color=(255, 214, 160), bright=150)
+    # duct from the hub to the cooling plant: caged lamps on the south wall
+    for x in (1760, 2016, 2272):
+        wall_lamp(m, x, 1152, 290, "+y", (255, 180, 110), bright=180)
+    for x in (2432, 2688, 2880):
+        wall_lamp(m, x, 1152, 192 - (x - 2304) // 2 + 90, "+y", (255, 180, 110), bright=180)
+    # cooling plant: tanks as cover, transformer boxes, cold blue light
+    F = -128
+    # (the strip y 1152..1280 at the foot of the stairs stays clear)
+    for (x, y) in ((3200, 1040), (3520, 1040)):
+        kit.prop(m, "models/props_wasteland/coolingtank01.mdl", x, y, F, solid=6)
+    kit.prop(m, "models/props_wasteland/horizontalcoolingtank04.mdl", 3480, 880, F + 61, yaw=0, solid=6, on_floor=False)
+    for (x, y) in ((3040, 800), (3660, 1216)):          # (the approach to the server-hall door stays open)
+        kit.prop(m, "models/props_c17/substation_stripebox01a.mdl", x, y, F, solid=6)
+    for x in (3072, 3328, 3584):
+        for y in (864, 1152):
+            kit.light(m, x, y, 200, color=(120, 190, 255), bright=200)
+    panel(m, 3710, 1000, 60, 124, "-x", 128, "vaccine2/vac_sign3", depth=2)         # CORE ROOM, by the vault corridor
+    # corridor to the vault
+    for x in (3840, 4096, 4352):
+        wall_lamp(m, x, 896, 0, "-y", (120, 190, 255), bright=150)
+    kit.light(m, 4448, 640, -40, color=(120, 190, 255), bright=150)

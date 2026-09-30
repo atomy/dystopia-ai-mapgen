@@ -12,7 +12,7 @@ Paths are relative to the Dystopia install (`<Dystopia>/dystopia/...`).
   whose output was too basic to be playable.
 
 ## Outcome
-- `maps/dys_blackice.bsp` v1.2, about 29 MB, with everything packed inside. It is a rainy neon-city objective map:
+- `maps/dys_blackice.bsp` v1.3, about 28 MB, with everything packed inside. It is a rainy neon-city objective map:
   metro, street market, plaza, tower lobby, server hall and core vault, plus one open cyberspace hall.
 - Three objectives: breach the gate, crack the security hub, crash the BLACK ICE core.
 - The generator in this folder is the single source of truth. See [README.md](README.md) to build it and
@@ -52,6 +52,20 @@ Paths are relative to the Dystopia install (`<Dystopia>/dystopia/...`).
    - Shop shutters recessed into the facades; a spawn exit freed from a staircase; metro tunnels that continue
      behind forcefields; a readable station sign; forcefields set into their openings.
    - A custom Kuroda monument model (Blender, scripted, compiled with studiomdl) replaces the brush obelisk.
+10. **Playtest round 3 (2026-09-30, v1.3).**
+   - The monument felt too aggressive (crystal spikes). Five parallel sub-agents sketched five calmer concepts
+     in Blender on one shared stage (`monument/concepts/stage.py`, the same plaza stand-in and cameras). The
+     user picked the Fibre Tree, which the same agent then built as the real prop.
+   - The security gate can now only be breached in meatspace (the cyberspace gate lock was removed).
+   - Decker spawn pods moved outside the hall; the tubes run through a dark duct and the hall wall.
+   - Fire-escape balconies hung in mid-air above the roof walkway, and ten neon signs floated 4u off their
+     facades. The validator now groups touching detail brushes into clusters and requires every cluster to
+     touch the shell, a world brush or a prop.
+   - Alternative routes: a north service door (plaza side, opens with the gate) up to a west door into the
+     hub, and a cooling route from the hub's north door through a new cooling plant to the vault (opens with
+     the hub). A lobby turret terminal in cyberspace; turret terminals lock when their objective falls.
+   - The gate alarm kept sounding after capture (looping WAV, see below); override cut to 30 s.
+   - Spawn pads blocked movement; the arcade's spawn points crowded its jack-in terminal.
 
 ## Verified Dystopia facts
 - **Brush-entity origin.** Brush entities need an `origin` keyvalue set to the bounds centre, as Hammer writes
@@ -89,13 +103,24 @@ Paths are relative to the Dystopia install (`<Dystopia>/dystopia/...`).
 - **Turrets and gates.** `npc_turret_ceiling` ignores `tools/toolsblock_los`: a lattice gate
   (`metal/metalgate001a`, `%compilepassbullets`) lets turrets shoot straight through. Only a solid brush in the door
   stops them, and it blocks bullets both ways.
+- **Spawn pads.** `dys_spawn_point` shows `models/props/prop_spawner.mdl`, which is solid and blocks movement.
+  Spawnflag 1 ("Disable Model") removes it; the map places the same pad as a non-solid prop for the look.
+- **Locking a terminal after capture.** Route the screen's button outputs through `logic_relay`s and send the
+  relays `Disable` on capture: pressing the buttons then does nothing.
+- **Looping sounds.** An `ambient_generic` flagged "Is NOT Looped" (spawnflags 32) ignores `StopSound`. If its
+  WAV loops anyway (a `cue ` chunk, e.g. `ambient/alarms/alarm1.wav`), it sounds forever. Flag looping WAVs as
+  looped (spawnflags 16 = start silent only).
 - **Zero-g tubes.** Two `cyber_gravity_volume` brushes, one at each end of a tube, switch gravity off inside it.
   Their `angles` must point at the room that has gravity (verified: a decker hovers in the tube and lands on the
   hall floor after the exit volume). A static `cyber_ice` (spawnflags 1) with a team lets only that team through.
 - **Entry cameras.** The jack-in terminal's screen shows the target `point_camera` upside down. Rolling the camera
   180 degrees also rolls the arriving decker's view, so keep roll 0 and make the camera's view symmetric instead.
-- **Tube look.** Official maps build tubes from translucent brushes; dys_cybernetic uses
-  `twincannon/twin_cyberblue_trans` everywhere, which gives the smooth glowing-blue look.
+- **Tube look.** Official maps build tubes from translucent brushes (dys_cybernetic: `twincannon/twin_cyberblue_trans`).
+  From inside, a plain translucent wall almost vanishes against a blue room. The additive, `$nocull`
+  `twincannon/twin_cyberblue_trans_additive_nocull` plus light strips embedded in the glass along the four edges
+  reads from inside and outside. Keep the inside smooth: strips that stick into the tube snag the decker.
+- **Tube paths.** A decker flying a tube stops dead on any other brush inside it: a cover block in the path of
+  the tube's lower bend trapped the test decker. Zero-g also has no friction, so an idle decker keeps drifting.
 - **Circlet rings.** `cyspfinal/circlet*` are additive. On a small disc, world-aligned texture coordinates split
   the ring into loose white arcs; fit the texture to the disc. Official maps stack them as static halos.
 - **Lighting.** Interiors look right with quadratic lights (brightness in the hundreds). Short
@@ -136,9 +161,9 @@ Paths are relative to the Dystopia install (`<Dystopia>/dystopia/...`).
   construction and a leak check runs before vbsp. All detail is `func_detail` or brush entities.
 - **No objective skipping.** The cyberspace-controlled maintenance door only works after the hub has fallen.
   Without that, Punks could skip objective 2. The Datavault spawn starts disabled for the same reason.
-- **Two ways through each objective.**
-  - Gate: a meatspace override or a cyberspace hack.
-  - Core shield: a temporary drop from cyberspace or a permanent drop by destroying the emitters.
+- **How each objective opens.**
+  - Gate: meatspace only, a 30 s override at the north guard post (the cyberspace hack was removed on request).
+  - Core shield: two ways, a temporary drop from cyberspace or a permanent drop by destroying the emitters.
 - **Cyberspace is one open hall.** A red core terrace with ramps, cover blocks, black pillars, three wall pods
   with zero-g tubes down to landing pads, and five terminal houses. Each house's doorway is its ICE, and the screen hangs on the back
   wall facing the door. Floating node icons (`vaccinert/dys_*node`) label the houses.
@@ -151,7 +176,7 @@ Paths are relative to the Dystopia install (`<Dystopia>/dystopia/...`).
 
 ## Known limitations / next steps
 - **Playtesting.** One solo playtest so far, no full match. Timings and health values are first-pass:
-  60 s override, 8 s crack, 40 s shield drop, core 2600 hp, emitters 900 hp, turrets 800 hp (10 bolts).
+  30 s override, 8 s crack, 40 s shield drop, core 2600 hp, emitters 900 hp, turrets 800 hp (10 bolts).
 - **Gate objective marker.** The IFF box is drawn around the gate itself, which invites shooting it. The breach
   actually happens at the override screen in the north guard post or in cyberspace.
 - **Round time** comes from the server default.

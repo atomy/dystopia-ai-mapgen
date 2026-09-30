@@ -182,22 +182,22 @@ def street(b):
         floor_overlay(m, "concrete/concrete_paintline_large", -1760, -150 + i * 60, 0, 180, 28, yaw=0)
 
     # --- north side shop fronts (facade at y=320 faces -y)
-    neon(m, -3136, 316, 236, 292, "-y", 384, "neon/neon_thdsm", (255, 70, 90), bright=70)            # noodle bar
-    neon(m, -2688, 316, 150, 246, "-y", 96, "neon/s_neon1", (255, 50, 50), bright=60)                 # pawn shop
-    neon(m, -2048, 316, 176, 240, "-y", 256, "signs/sign_netexcess02", (120, 160, 255), bright=70)     # arcade
-    neon(m, -1760, 316, 150, 246, "-y", 96, "neon/s_neon_netexcess", (255, 60, 70), bright=50)
+    neon(m, -3136, 320, 236, 292, "-y", 384, "neon/neon_thdsm", (255, 70, 90), bright=70)            # noodle bar
+    neon(m, -2688, 320, 150, 246, "-y", 96, "neon/s_neon1", (255, 50, 50), bright=60)                 # pawn shop
+    neon(m, -2048, 320, 176, 240, "-y", 256, "signs/sign_netexcess02", (120, 160, 255), bright=70)     # arcade
+    neon(m, -1760, 320, 150, 246, "-y", 96, "neon/s_neon_netexcess", (255, 60, 70), bright=50)
     blade(m, -2656, 320, 360, 872, "-y", 128, "props/sign_hotel01a", (255, 200, 150), bright=90)        # HOTEL
     # --- south side (facade at y=-320 faces +y)
-    neon(m, -3264, -316, 150, 246, "+y", 96, "neon/s_neon2", (60, 220, 255), bright=60)               # liquor
-    neon(m, -2816, -316, 236, 300, "+y", 256, "neon/neon_datasmith", (255, 90, 200), bright=70)       # electronics
-    neon(m, -2304, -316, 150, 246, "+y", 96, "neon/s_neon_diner", (80, 220, 255), bright=60)          # diner
+    neon(m, -3264, -320, 150, 246, "+y", 96, "neon/s_neon2", (60, 220, 255), bright=60)               # liquor
+    neon(m, -2816, -320, 236, 300, "+y", 256, "neon/neon_datasmith", (255, 90, 200), bright=70)       # electronics
+    neon(m, -2304, -320, 150, 246, "+y", 96, "neon/s_neon_diner", (80, 220, 255), bright=60)          # diner
     for spec in SHUTTERS:
         shutter(m, *spec)
-    neon(m, -1856, -316, 150, 246, "+y", 96, "neon/s_neon3", (255, 150, 40), bright=60)               # SoyKaf
-    neon(m, -1856, -316, 290, 354, "+y", 128, "neon/dog_neon17", (90, 200, 255), bright=40, sprite=False)
+    neon(m, -1856, -320, 150, 246, "+y", 96, "neon/s_neon3", (255, 150, 40), bright=60)               # SoyKaf
+    neon(m, -1856, -320, 290, 354, "+y", 128, "neon/dog_neon17", (90, 200, 255), bright=40, sprite=False)
     blade(m, -2240, -320, 420, 932, "+y", 128, "signs/osaka_sign01", (255, 90, 220), bright=90)
     # metro entrance sign over the kiosk mouth (kiosk opens east at x=-3456)
-    neon(m, -3452, 0, 330, 458, "+x", 128, "neon/s_neon_monorail", (80, 200, 255), bright=80)
+    neon(m, -3456, 0, 330, 458, "+x", 128, "neon/s_neon_monorail", (80, 200, 255), bright=80)
 
     # --- street lamps
     for (x, y, d) in [(-3200, 272, "-y"), (-2432, 272, "-y"), (-2816, -272, "+y"), (-2016, -272, "+y")]:
@@ -254,11 +254,11 @@ def plaza(b):
         for dx in (-84, 84):
             kit.prop(m, "models/props_foliage/shrub_01a.mdl", cx + dx, cy, 48, yaw=rng.randint(0, 359), solid=0,
                      fade=(2600, 3400))
-    # --- central monument in the sunken court: the Kuroda monument model (monument/), or a plain obelisk
-    # when the model hasn't been built
+    # --- central monument in the sunken court: the monument model (monument.py / monument/), or a plain
+    # obelisk when the model hasn't been built
     ox, oy = -512, 0
-    if assets.model_exists("models/blackice/kuroda_monument.mdl"):
-        import monument
+    import monument
+    if assets.model_exists(monument.MODEL):
         monument.place(m, ox, oy, -64)
     else:
         m.detail(box(ox - 48, oy - 48, -64, ox + 48, oy + 48, 320,
@@ -294,12 +294,12 @@ def plaza(b):
         kit.prop(m, "models/props_c17/concrete_barrier001a.mdl", x, y, 0, yaw=yaw, solid=6)
     # wrecks as big cover in front of the guard posts
     kit.prop(m, "models/props/brute_destroyed.mdl", -160, -600, 0, yaw=90, solid=6, fade=(3500, 4500))
-    kit.prop(m, "models/props_vehicles/van001a.mdl", -150, 606, 0, yaw=95, solid=6, fade=(3500, 4500))
-    # double-sided billboard on the rooftop's plaza edge: blocks the roof's view toward the gate; the gap at its
-    # north end is a drop into the plaza corner, where the annex hides the gate
-    m.detail(box(-1680, 704, 320, -1664, 960, 536, "metal/metalwall003a"))
-    panel(m, -1664, 832, 368, 496, "+x", 256, "twincannon/billboard_science_adf", depth=1)
-    panel(m, -1680, 832, 368, 496, "-x", 256, "twincannon/billboard_science_mcl", depth=1)
+    kit.prop(m, "models/props_vehicles/van001a.mdl", -170, 600, 0, yaw=5, solid=6, fade=(3500, 4500))  # gaps both sides
+    # small double-sided billboard on the rooftop's plaza edge: cover for attackers on the roof (a standing player
+    # is hidden), with open sight lines toward the plaza on both sides of it
+    m.detail(box(-1680, 776, 320, -1664, 904, 440, "metal/metalwall003a"))
+    panel(m, -1664, 840, 368, 432, "+x", 128, "twincannon/billboard_science_adf", depth=1)
+    panel(m, -1680, 840, 368, 432, "-x", 128, "twincannon/billboard_science_mcl", depth=1)
     # --- tower facade: vertical light pilasters + floodlights toward the plaza
     for y in (-960, -704, 704, 960):       # on the entrance storey, then on the setback facade above
         panel(m, 448, y, 32, 472, "-x", 16, "vaccinert/dys_vactrim5light", depth=2)

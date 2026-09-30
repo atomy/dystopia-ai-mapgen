@@ -50,6 +50,9 @@ def alleys(b):
         for z in (224, 416, 608):
             if (x, z) == (-2500, 224):
                 continue                # would hang over the fire-escape flight
+            backed = [b.L.label_at(xx, 1020, z + 4) for xx in (x - 90, x, x + 90)]
+            if not all(lab is not None and lab.kind == "solid" for lab in backed):
+                continue                # no wall behind it (the roof walkway is open above z 320)
             m.brush_ent("func_brush", box(x - 96, 1024, z, x + 96, 1072, z + 8,
                                           {"all": "metal/metalwall003a", "top": "metal/metalfireescape002a"}),
                         Solidity="2", solidbsp="0", StartDisabled="0", spawnflags="2", InputFilter="0")

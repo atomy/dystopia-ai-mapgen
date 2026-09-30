@@ -1,25 +1,39 @@
-# Kuroda monument
+# Kuroda fibre tree
 
-`models/blackice/kuroda_monument.mdl` is the static centrepiece of the sunken court on Kuroda Plaza in dys_blackice.
-It is built procedurally in Blender, drawn with Pillow and compiled with vtex and studiomdl. Nothing in it is
-hand-edited.
+`models/blackice/kuroda_tree.mdl` is the static centrepiece of the sunken court on Kuroda Plaza in dys_blackice. It
+replaced the earlier spiky obelisk. It is built procedurally in Blender, drawn with Pillow and compiled with vtex
+and studiomdl. Nothing in it is hand-edited.
 
-**Design.**
-- A stepped hex plinth. Its risers carry cyan light lines, and "黒田 KURODA" is lettered in red neon on all
-  six pedestal faces.
-- A tapering black glossy hex shaft. A red neon groove runs up each face and converges on a pyramidion.
-- The pyramidion carries the Kuroda emblem: a red neon hexagon ring around a floating white-hot diamond,
-  held by two light rods. A finial with a red beacon sits on top.
-- Four clusters of "black ice" crystals with glowing cyan edges grow out of the plinth corners.
-- Six small uplight pucks sit on the pedestal corners.
+**Design.** A calm organic-tech "tree of knowledge":
+- Trunk: twelve black glossy cables twist 200° round a core. Six cyan light strands rise in its grooves, dim at
+  the base and bright near the crown.
+- Limbs: the trunk parts into six limbs. Each limb is two cables twisting round each other and ends in two branch
+  ends with white nodes.
+- Crown: fibre-optic tufts glow toward their lit tips, with soft halos. About 130 floating data leaves (mostly cyan,
+  a few white and red) form a rounded crown up to r≈170 at 220-382u.
+- Base: the tree grows out of a black mirror pool with broken cyan "data ripples". The pool sits in a hex planter
+  (board-formed concrete, black metal rim cap with a red neon band). The Kuroda emblem (hex outline + diamond) is
+  on the west face (the approach) and the 60° and 300° faces.
+- Roots: pairs of cable roots spill over the 0°, 120° and 240° faces into cyan-ringed floor ports.
 
 **Specs.**
-- Size: about 417u tall, footprint radius 146u. The base centre is the model origin.
-- About 1.5k triangles and three materials:
-  - `kuroda_metal`: VertexLitGeneric trim sheet with phong, envmap and a selfillum mask.
-  - `kuroda_ice`: the same shader setup, for the crystals.
-  - `kuroda_neon`: UnlitGeneric.
-- 17 convex collision pieces (`$concave`).
+- Size: 382u tall. Below z 220 the footprint radius is 148u; the crown reaches r≈172. The base centre is the model
+  origin.
+- About 7.9k triangles, with cable faces hidden inside the trunk culled. Four materials:
+  - `kuroda_tree_cable`: VertexLitGeneric 512 trim sheet with phong, envmap and a selfillum mask. It has four bands:
+    insulation, a fibre glow ramp (the only selfillum), brushed metal, and the black mirror for the pool.
+  - `kuroda_tree_concrete`: VertexLitGeneric with phong.
+  - `kuroda_tree_neon`: UnlitGeneric. Rows: red tube, cyan tube, white-hot, cyan ramp.
+  - `kuroda_tree_leaf`: UnlitGeneric `$additive` `$nocull` atlas of data leaves and glow dots. Additive blending is
+    order-independent, so the leaves never need sorting. `$mostlyopaque` keeps the rest of the model in the opaque
+    pass.
+- 19 convex collision pieces (`$concave`):
+  - the planter body;
+  - six rim bars;
+  - the trunk as three pieces: base cone, shaft (r 33), and top flare up to z 226;
+  - per root pair, a low floor ramp (≤ 16u, steppable) and a bridge over the rim;
+  - three low slabs over the cables rising from the pool.
+  The crown, fibres and leaves have no collision. The pool strip between the rim and the trunk is at least 32u wide.
 - The model is static, with no animation.
 
 ## Rebuild
@@ -27,26 +41,38 @@ From `dys_blackice/`:
 ```
 python monument.py --previews      # textures -> vtex, Blender (SMDs + QC + .blend), studiomdl, checks
 ```
-This is the same as calling `monument.build(previews=True)`. It raises if any step fails. The run writes:
-- `models/blackice/kuroda_monument.*` and `materials/models/blackice/kuroda_*` in the game folder.
+This is the same as calling `monument.build(previews=True)`. It raises if any step fails: Blender, vtex, a studiomdl
+error or warning, a model that is not a static prop, or a missing output. The run writes:
+- `models/blackice/kuroda_tree.*` and `materials/models/blackice/kuroda_tree_*` (sources in
+  `materialsrc/models/blackice/`) in the game folder.
 - `build/monument/` with the SMDs, the .blend and the logs.
-- `build/monument_preview_*.png`.
+- `build/monument_preview_{eye,approach,wide}.png`.
 
-In the map code, `monument.place(m, -512, 0, -64)` adds the prop and its lights, and `monument.pack_pairs()`
-lists the files to pack into the BSP.
+In the map code, `monument.place(m, -512, 0, -64)` adds the prop and its lights:
+- a light_spot 640u above the base pointing down, so the canopy throws a dappled shadow with vrad `-StaticPropPolys`;
+- red lights under the emblems and cyan lights at the floor ports;
+- two warm uplights in the pool;
+- env_sprite glows on eight outer tips and the hub.
+
+`monument.pack_pairs()` lists the files to pack into the BSP.
 
 ## Files
 | File | Role |
 |---|---|
-| `build_monument.py` | Blender script: geometry, UVs, collision hulls, SMD/QC export, preview scene and renders |
+| `build_tree.py` | Blender script: geometry, UVs, collision hulls, SMD/QC export, light anchors, preview scene and renders |
 | `smd_export.py` | Minimal SMD exporter: reference mesh, convex collision pieces, idle sequence |
-| `textures.py` | Pillow textures, vtex compile, VMTs |
-| `kuroda_monument.qc` | Generated by `build_monument.py`. The SMDs it references live in `../build/monument/` |
+| `tree_textures.py` | Pillow textures, vtex compile, VMTs |
+| `kuroda_tree.qc` | Generated by `build_tree.py`. The SMDs it references live in `../build/monument/` |
+| `kuroda_tree_lights.json` | Generated by `build_tree.py`: floor ports, sprite tips and hub, read by `monument.place()` |
+| `concepts/` | The five Blender concept sketches the tree was picked from (`stage.py` + `concept_*.py`) |
 
 ## Conventions (verified against SDK 2013 studiomdl)
 - **Rotation.** studiomdl rotates SMD geometry +90° about Z. The exporter pre-rotates by -90° so that Blender
-  +X is model +X. At yaw 0 the emblem faces west (the approach) and east (the tower).
+  +X is model +X. At yaw 0 an emblem faces west (the approach).
 - **Winding.** Blender's CCW front faces are written in loop order. This matches stock Dystopia props.
-- **UVs.** SMD V points up and studiomdl flips it.
+- **UVs.** SMD V points up and studiomdl flips it. Blender UVs map straight onto the Pillow images (V=1 is the top
+  row).
 - **Collision.** Collision vertices only weld when position, normal and UV all match. Each piece is therefore
   written with shared radial normals, or studiomdl splits it per face and falls back to a single hull.
+- **Env cubemap flag.** studiomdl leaves `STUDIOHDR_FLAGS_USES_ENV_CUBEMAP` unset. Stock envmapped props
+  (combine_interface001, the soda machine) don't have it either, so no patch is needed.

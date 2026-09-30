@@ -1,8 +1,8 @@
 """Gameplay layer for dys_blackice: spawns, objectives, logic, doors, screens, jackpoints.
 
 Objective chain (Punks attack, Corps defend):
-  1 GATE   meatspace override (60 s, Corps can abort) at the north guard post,
-           or instant hack from cyberspace (password ICE).        -> Neon Arcade spawn for Punks
+  1 GATE   meatspace only: 30 s override (Corps can abort) at the  -> Neon Arcade spawn for Punks
+           north guard post.
   2 HUB    decker crack (trigger_crackable) in the Security Hub. -> lobby spawn flips, vault spawn opens
   3 CORE   final. Core is invulnerable while its shield is up. The shield drops for 40 s
            from cyberspace (encrypted ICE), or permanently when both emitters are destroyed.
@@ -40,7 +40,10 @@ def spawn_area(m: VMF, name, sid, team, label, points, yaw, enabled=True):
     m.ent("dys_spawn", (cx, cy, cz + 16), targetname=name, team=str(team), spawnid=str(sid),
           spawnname=label, spawnflags="1" if enabled else "0")
     for (x, y, z) in points:
-        m.ent("dys_spawn_point", (x, y, z + 1), spawnid=str(sid), angles=f"0 {yaw} 0", spawnflags="0")
+        # the entity's own pad model is solid and players bump into it: disable it (spawnflags 1) and show the
+        # same pad as a non-solid prop instead
+        m.ent("dys_spawn_point", (x, y, z + 1), spawnid=str(sid), angles=f"0 {yaw} 0", spawnflags="1")
+        kit.prop(m, "models/props/prop_spawner.mdl", x, y, z, yaw=yaw, solid=0)
 
 
 def grid(x0, y0, x1, y1, z, nx, ny):
@@ -115,7 +118,9 @@ def add_gameplay(b):
 
     # --- spawns (ids increase from the Punk side toward the Corps side)
     spawn_area(m, "spawn_punk_hq", 1, PUNKS, "Metro Hideout", grid(-5840, -176, -4656, 448, -384, 5, 4), 0)
-    spawn_area(m, "spawn_arcade", 2, 0, "NetExcess Arcade", grid(-2272, 432, -1872, 848, 0, 4, 4), 270)
+    jip = (-2304, 640)                  # keep the arcade jack-in terminal clear: no spawn points in front of it
+    spawn_area(m, "spawn_arcade", 2, 0, "NetExcess Arcade",
+               [p for p in grid(-2272, 432, -1872, 848, 0, 4, 4) if abs(p[0] - jip[0]) > 160], 270)
     spawn_area(m, "spawn_corp_lobby", 3, CORPS, "Kuroda Security", grid(1936, -464, 2368, 464, 192, 4, 5), 180)
     spawn_area(m, "spawn_corp_vault", 4, CORPS, "Datavault Control", grid(4592, -336, 4960, 336, -128, 4, 5), 180,
                enabled=False)       # enabled when the hub falls
@@ -140,9 +145,12 @@ def add_gameplay(b):
     la = m.ent("logic_auto", (-5200, 0, -300), spawnflags="0")
     la.out("OnMapSpawn", "ff_arcade_front", "Disable")
     la.out("OnMapSpawn", "ff_arcade_back", "Disable")
-    # guard-post corridors are Corps-only until the gate falls
+    # guard-post corridors and the north service door are Corps-only until the gate falls
     forcefield(m, "ff_guard_n", 552, 560, 0, 560, 656, 128, CORPS)
     forcefield(m, "ff_guard_s", 552, -656, 0, 560, -560, 128, CORPS)
+    forcefield(m, "ff_service_n", 460, 1024, 0, 468, 1152, 128, CORPS)
+    # the cooling route from the hub to the vault is Corps-only until the hub falls
+    forcefield(m, "ff_cooling", 1536, 1164, 192, 1664, 1172, 320, CORPS)
 
     # --- objectives
     m.ent("dys_objective", (300, 0, 64), targetname="obj_gate", team=str(CORPS), Index="1", IsPrimary="1",
@@ -159,8 +167,7 @@ def add_gameplay(b):
           PunksText="Drop the core shield", CorpsText="Keep the core shield up")
 
     # --- messages
-    msg(m, "msg_override", "GATE OVERRIDE IN PROGRESS - 60 SECONDS", "255 200 60")
-    msg(m, "msg_override30", "GATE OVERRIDE - 30 SECONDS", "255 200 60", hold=3)
+    msg(m, "msg_override", "GATE OVERRIDE IN PROGRESS - 30 SECONDS", "255 200 60")
     msg(m, "msg_override10", "GATE OVERRIDE - 10 SECONDS", "255 140 40", hold=3)
     msg(m, "msg_abort", "GATE OVERRIDE ABORTED", "90 200 255")
     msg(m, "msg_gate", "THE SECURITY GATE HAS BEEN BREACHED", "255 120 40", hold=6)
@@ -195,26 +202,21 @@ def add_gameplay(b):
     r = relay(m, "gate_override", 300, 700, 64)
     r.out("OnTrigger", "msg_override", "Display")
     r.out("OnTrigger", "snd_override", "PlaySound")
-    r.out("OnTrigger", "msg_override30", "Display", delay=30)
-    r.out("OnTrigger", "msg_override10", "Display", delay=50)
-    r.out("OnTrigger", "gate_done", "Trigger", delay=60)
+    r.out("OnTrigger", "msg_override10", "Display", delay=20)
+    r.out("OnTrigger", "gate_done", "Trigger", delay=30)
+    # alarm1.wav loops (cue chunk), so the entity must be flagged looped (spawnflags 16, not 48): a "not looped"
+    # ambient_generic ignores StopSound and the alarm would sound forever after the gate falls
     m.ent("ambient_generic", (288, 600, 120), targetname="snd_override", message="ambient/alarms/alarm1.wav",
-          health="7", radius="1800", spawnflags="48", pitch="100", pitchstart="100")
-    # cyberspace path (instant): wired in cyberspace() via 'cy_gate_fp'
-    f = kit.filter_team(m, "cy_gate_fp", PUNKS)
-    f.kv["origin"] = "288 700 96"
-    f.out("OnPass", "gate_done", "Trigger")
-
+          health="7", radius="1800", spawnflags="16", pitch="100", pitchstart="100")
     r = relay(m, "gate_done", 320, 700, 64, once=True)
     for tgt, inp, delay in [("obj_gate", "SetPunks", 0), ("gate1", "Open", 0), ("ff_guard_n", "Disable", 0),
-                            ("ff_guard_s", "Disable", 0), ("spawn_arcade", "SetPunks", 0),
+                            ("ff_guard_s", "Disable", 0), ("ff_service_n", "Disable", 0),
+                            ("spawn_arcade", "SetPunks", 0),
                             ("ff_arcade_front", "Enable", 0), ("ff_arcade_back", "Enable", 0),
                             ("tur_plaza", "Disable", 0), ("msg_gate", "Display", 0), ("snd_override", "StopSound", 0),
-                            ("gate_override", "Disable", 0), ("snd_gate_alarm", "PlaySound", 0),
-                            ("snd_gate_alarm", "StopSound", 8)]:
+                            ("gate_override", "Disable", 0),
+                            ("cy_gateturrets_off", "Disable", 0), ("cy_gateturrets_on", "Disable", 0)]:
         r.out("OnTrigger", tgt, inp, delay=delay)
-    m.ent("ambient_generic", (700, 0, 200), targetname="snd_gate_alarm", message="ambient/alarms/klaxon1.wav",
-          health="8", radius="3000", spawnflags="48", pitch="100", pitchstart="100")
 
     # ============================================================ OBJ 2: security hub
     # console the deckers crack (visible block + info target)
@@ -229,14 +231,15 @@ def add_gameplay(b):
     crk.out("OnStopCrack", "snd_hub_alarm", "StopSound")
     crk.out("OnStopCrack", "hub_alarm_light", "TurnOff")
     m.ent("ambient_generic", (1408, 960, 300), targetname="snd_hub_alarm", message="ambient/alarms/alarm_citizen_loop1.wav",
-          health="6", radius="1500", spawnflags="48", pitch="100", pitchstart="100")
+          health="6", radius="1500", spawnflags="16", pitch="100", pitchstart="100")      # looping wav: looped flag
     r = relay(m, "hub_done", 1408, 1000, 256, once=True)
     for tgt, inp, delay in [("obj_hub", "SetPunks", 0), ("spawn_corp_lobby", "SetPunks", 0),
                             ("ff_lobby_1", "SetPunks", 0), ("ff_lobby_2", "SetPunks", 0), ("ff_lobby_3", "SetPunks", 0),
                             ("spawn_corp_vault", "Enable", 0), ("blast1", "Open", 0), ("msg_hub", "Display", 0),
                             ("snd_hub_alarm", "StopSound", 0), ("hub_crack", "Disable", 0.1), ("hub_alarm_light", "TurnOff", 0),
-                            ("maint_open", "Enable", 0),
-                            ("tur_lobby", "Disable", 0)]:
+                            ("maint_open", "Enable", 0), ("ff_cooling", "Disable", 0),
+                            ("tur_lobby", "Disable", 0),
+                            ("cy_lobbyturrets_off", "Disable", 0), ("cy_lobbyturrets_on", "Disable", 0)]:
         r.out("OnTrigger", tgt, inp, delay=delay)
     # blast doors between lobby and service lobby (open when the hub falls)
     kit.gate(m, "blast1", 1860, -128, 0, 1884, 128, 144, "metal/metalgate001a", speed=40, lip=8)
@@ -329,9 +332,10 @@ PANELS = [
     {"name": "bi_gate_override", "type": "dys_screen", "title": "KURODA GATE CONTROL",
      "buttons": [("#dystopia_R_ManualOverride", "button1"), ("Abort Override", "button2")],
      "background": "vgui/screens/secorp_bg1"},
-    {"name": "bi_cyber_gate", "type": "dys_cyberscreen", "title": "GATE LOCK",
-     "buttons": [("#dystopia_R_OpenDoors", "button1")], "background": "vgui/screens/cyberpanel_bg"},
     {"name": "bi_cyber_gateturrets", "type": "dys_cyberscreen", "title": "#dystopia_R_TurretControl",
+     "buttons": [("Disable", "button1"), ("Enable", "button2")],
+     "background": "vgui/screens/cyberpanel_bg"},
+    {"name": "bi_cyber_lobbyturrets", "type": "dys_cyberscreen", "title": "#dystopia_R_TurretControl",
      "buttons": [("Disable", "button1"), ("Enable", "button2")],
      "background": "vgui/screens/cyberpanel_bg"},
     {"name": "bi_cyber_core", "type": "dys_cyberscreen", "title": "BLACK ICE SHIELD",

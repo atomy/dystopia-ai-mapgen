@@ -65,6 +65,68 @@ def _face_samples(bb, tol):
             [(x, y, z0 - tol) for x in xs for y in ys], [(x, y, z1 + tol) for x in xs for y in ys]]
 
 
+DETAIL = ("func_detail", "func_illusionary", "func_brush", "func_breakable", "func_door", "cyber_floor")
+FLOAT_OK = ("vaccinert/dys_", "termitex/icon_", "cyspfinal/circlet")    # cyberspace holograms float on purpose
+
+
+def _touch(a, b, tol):
+    return all(a[i] - tol <= b[i + 3] and b[i] - tol <= a[i + 3] for i in range(3))
+
+
+def _floating_clusters(m, level, props, tol=2):
+    """Detail brushes are grouped into clusters of touching pieces (a balcony and its railing are one); every
+    cluster must touch the CSG shell, a world brush or a prop somewhere. Floating clusters are reported."""
+    def visible(s):
+        return any(not sd.tex.material.lower().startswith("tools/") for sd in s.sides)
+    items = []                        # (bbox, entity, solid)
+    for e in m.entities:
+        if e.classname in DETAIL:
+            items += [(s.bbox(), e, s) for s in e.solids if visible(s)]
+    world = _Grid([s.bbox() for s in m.world if visible(s)])
+    grid, cell = {}, 256
+    for i, (b, e, s) in enumerate(items):
+        for gx in range(int((b[0] - tol) // cell), int((b[3] + tol) // cell) + 1):
+            for gy in range(int((b[1] - tol) // cell), int((b[4] + tol) // cell) + 1):
+                grid.setdefault((gx, gy), []).append(i)
+    parent = list(range(len(items)))
+
+    def find(i):
+        while parent[i] != i:
+            parent[i] = parent[parent[i]]
+            i = parent[i]
+        return i
+    for cell_items in grid.values():
+        for a in range(len(cell_items)):
+            for b in range(a + 1, len(cell_items)):
+                i, j = cell_items[a], cell_items[b]
+                if find(i) != find(j) and _touch(items[i][0], items[j][0], tol):
+                    parent[find(i)] = find(j)
+
+    def anchored(b):
+        for face in _face_samples(b, tol):
+            for p in face:
+                lab = level.label_at(int(p[0]), int(p[1]), int(p[2]))
+                if (lab is not None and lab.kind == "solid") or world.hit(p) or props.hit(p):
+                    return True
+        return False
+    groups = {}
+    for i in range(len(items)):
+        groups.setdefault(find(i), []).append(i)
+    problems = []
+    for idx in groups.values():
+        boxes = [items[i][0] for i in idx]
+        if any(anchored(b) for b in boxes):
+            continue
+        mats = sorted({sd.tex.material for i in idx for sd in items[i][2].sides
+                       if not sd.tex.material.lower().startswith("tools/")})
+        if min(b[1] for b in boxes) < -6000 or any(mt.lower().startswith(FLOAT_OK) for mt in mats):
+            continue                  # 3D skybox, cyberspace holograms
+        c = [(min(b[k] for b in boxes) + max(b[k + 3] for b in boxes)) / 2 for k in range(3)]
+        problems.append(f"floating {items[idx[0]][1].classname} x{len(idx)} ({', '.join(mats[:3])}) "
+                        f"at ({c[0]:.0f} {c[1]:.0f} {c[2]:.0f})")
+    return problems
+
+
 def floating(m, level, tol=6, glow_reach=24):
     """Props not mounted on anything (no face mostly backed by geometry or another prop), thin sign panels
     with nothing behind them, and glow sprites with nothing near them."""
@@ -84,23 +146,7 @@ def floating(m, level, tol=6, glow_reach=24):
         faces = _face_samples(bb, tol)
         if max(sum(solid(p, bb) for p in face) for face in faces) < 5 and not solid(faces[4][4], bb):
             problems.append(f"floating prop {e.kv['model']} at ({e.kv['origin']})")
-    for e in m.entities:          # thin sign/decal panels need a backing on one side
-        if e.classname not in ("func_detail", "func_illusionary", "func_brush"):
-            continue
-        for s in e.solids:
-            if len(s.sides) != 6 or any(sorted(map(abs, sd.normal)) != [0, 0, 1] for sd in s.sides):
-                continue            # only axis-aligned box panels
-            bb = s.bbox()
-            dims = [bb[i + 3] - bb[i] for i in range(3)]
-            thin = min(range(3), key=lambda i: dims[i])
-            if dims[thin] > 4 or sorted(dims)[1] < 12 or thin == 2:
-                continue
-            if bb[1] < -6000:
-                continue            # 3D skybox (1/16 scale)
-            if max(sum(solid(p) for p in face) for face in _face_samples(bb, 10)) < 5:
-                mat = next((sd.tex.material for sd in s.sides if not sd.tex.material.startswith("tools/")), "?")
-                problems.append(f"floating panel {e.classname} {mat} at "
-                                f"({(bb[0] + bb[3]) / 2:.0f} {(bb[1] + bb[4]) / 2:.0f} {(bb[2] + bb[5]) / 2:.0f})")
+    problems += _floating_clusters(m, level, props)
     for e in m.entities:
         if e.classname != "env_sprite":
             continue

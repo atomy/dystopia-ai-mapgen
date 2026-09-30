@@ -18,7 +18,7 @@ import extras
 import tools
 
 NAME = "dys_blackice"
-VERSION = "1.2"
+VERSION = "1.3"
 LOOSE = [tools.GAME / "materials" / "blackice", *(tools.GAME / "materials" / "overviews").glob(f"{NAME}_*"),
          tools.GAME / "materials" / "loading" / f"{NAME}.vtf", tools.GAME / "models" / "blackice",
          tools.GAME / "materials" / "models" / "blackice"]
@@ -76,7 +76,7 @@ def logic():
     with tools.GameSession(NAME, width=1280, height=720) as g:
         g.cmd("sv_cheats 1", "developer 2", "mp_instantspawn 1", "jointeam 2", sleep=5.0)
         g.cmd("echo QA_MAINT_EARLY", "ent_fire maint_open Trigger", sleep=2.0)
-        g.cmd("echo QA_GATE", "ent_fire gate_fp TestActivator", sleep=64.0)     # 60 s override
+        g.cmd("echo QA_GATE", "ent_fire gate_fp TestActivator", sleep=34.0)     # 30 s override
         g.cmd("echo QA_HUB", "ent_fire hub_done Trigger", sleep=3.0)
         g.cmd("echo QA_MAINT_LATE", "ent_fire maint_open Trigger", sleep=2.0)
         g.cmd("echo QA_SHIELD", "ent_fire shield_down Trigger", sleep=2.0)
@@ -136,7 +136,7 @@ def make_zip():
         for p in sorted(tools.SRC.glob("*.py")) + [tools.SRC / "PLAN.md", tools.SRC / "README_release.txt"]:
             zf.write(p, f"generator/{p.name}")
         for p in sorted((tools.SRC / "monument").glob("*.*")):
-            if p.suffix in (".py", ".qc", ".md"):
+            if p.suffix in (".py", ".qc", ".md", ".json"):
                 zf.write(p, f"generator/monument/{p.name}")
         for sub in ("blackice", "models/blackice"):
             for p in sorted((tools.GAME / "materialsrc" / sub).glob("*")):

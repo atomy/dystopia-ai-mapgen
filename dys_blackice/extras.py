@@ -22,7 +22,8 @@ LAYERS = [  # name, pos_z (layer active when player z >= pos_z), floor z band [l
 ]
 LABELS = [("METRO", -5250, 100, "b1"), ("MARKET", -2600, 0, "g"), ("PLAZA", -620, 0, "g"), ("LOBBY", 1200, 0, "g"),
           ("SERVERS", 3130, 0, "b1"), ("VAULT", 4130, 0, "b1"), ("HUB", 1408, 980, "l2"), ("SECURITY", 2160, 0, "l2"),
-          ("DATAVAULT", 4800, -520, "b1"), ("ROOFS", -2000, 860, "l2")]
+          ("DATAVAULT", 4800, -520, "b1"), ("ROOFS", -2000, 860, "l2"), ("COOLING", 3328, 1024, "b1"),
+          ("SERVICE", 880, 1088, "g")]
 
 
 def _px(x, y):
@@ -207,6 +208,9 @@ def place_soundscapes(m: VMF):
         ("blackice.tower", (2160, 0, 60), 600), ("blackice.tower", (1900, -1088, 260), 800),
         ("blackice.servers", (3130, 0, -60), 900), ("blackice.vault", (4128, -330, -60), 800),
         ("blackice.vault", (4800, 0, -60), 450),
+        ("blackice.tower", (832, 1088, 100), 450), ("blackice.tower", (1920, 1216, 260), 700),
+        ("blackice.servers", (3328, 1024, -40), 700), ("blackice.servers", (2624, 1216, 60), 400),
+        ("blackice.vault", (4160, 832, -60), 450),
     ]
     for ss, org, rad in spots:
         m.ent("env_soundscape", org, soundscape=ss, radius=str(rad), StartDisabled="0")

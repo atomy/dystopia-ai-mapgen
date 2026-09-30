@@ -71,6 +71,12 @@ drives meatspace doors, turrets or objectives.
       narrowed with annexes and cover; zero-g cyber tubes from wall pods with team ICE; recessed
       shutters, wall-mounted lamps and pipes, working shop monitors; metro tunnels behind forcefields;
       Kuroda monument model (Blender -> studiomdl) in the court; floating-prop/panel validator
+- [x] 11 Playtest round 3 (2026-09-30, v1.3): five monument concepts sketched by parallel sub-agents, the
+      user picked the Fibre Tree; gate breach meatspace-only (30 s override, alarm stops on capture);
+      decker pods outside the hall, the tube slope outside too; tube glass visible from inside; validator
+      checks whole detail clusters for anchoring; alternative routes (north service door -> hub, hub ->
+      cooling plant -> vault); lobby turret terminal; terminals lock when their objective falls;
+      non-colliding spawn pads
 
 ## Rebuild
     python blackice.py --compile --final      # generate + validate + compile + pack

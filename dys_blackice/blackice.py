@@ -166,6 +166,19 @@ class BlackIce:
         A(1920, -1152, -128, 2688, -1024, 320, "maint")         # corridor stairs down (descending +x)
         A(2560, -1152, -128, 2688, -768, 320, "maint")          # shaft bottom -> maintenance door
 
+        # north service route (obj 2 alternative): a service door in the tower's north facade, off the plaza's
+        # north-east corner, leads up a stair hall to a west door into the security hub
+        A(448, 1024, 0, 576, 1152, 128, "service")              # service door through the facade
+        A(576, 1024, 0, 704, 1152, 144, "service")              # passage
+        A(704, 1024, 0, 1152, 1152, 320, "service")             # stair hall rising +x to the hub floor (192)
+        # cooling route (obj 3 alternative): hub north door -> duct -> stairs down -> cooling plant -> vault
+        A(1536, 1152, 192, 2304, 1280, 320, "maint")            # duct east from the hub's north wall
+        A(2304, 1152, -128, 2944, 1280, 320, "maint")           # stair shaft down to the server-hall level
+        A(2944, 768, -128, 3712, 1280, 256, "server")           # cooling plant hall
+        A(3200, 640, -128, 3328, 768, 0, "server")              # door into the server hall
+        A(3712, 768, -128, 4512, 896, 32, "maint")              # corridor east, north of the vault
+        A(4384, 512, -128, 4512, 768, 0, "maint")               # into the vault's north-east walkway corner
+
         # ---------------- Zone E: server hall (floor z=-128)
         A(2304, -192, -128, 2560, 192, 160, "service")          # stairwell from service lobby down to hall
         A(2560, -640, -128, 3712, 640, 192, "server")
@@ -228,6 +241,11 @@ class BlackIce:
             kit.rail(m, 2304, y, 2432, y, 0, h=40, mat="metal/metalwall003a")
         # maintenance corridor: 320 over 640 descending east, then flat through the shaft to the door
         kit.stairs(m, 1920, -1152, -128, 2560, -1024, 192, "-x", step=STEP, mat="metal/metalfloor003a")
+        # north service route: 192 over 384 up to the hub's west door, short landing at the top
+        kit.stairs(m, 704, 1024, 0, 1088, 1152, 192, "+x", step=STEP, mat="metal/metalfloor003a")
+        m.detail(box(1088, 1024, 0, 1152, 1152, 192, {"all": "metal/metalwall003a", "top": "metal/metalfloor003a"}))
+        # cooling route: 320 over 640 from the duct down into the cooling plant
+        kit.stairs(m, 2304, 1152, -128, 2944, 1280, 192, "-x", step=STEP, mat="metal/metalfloor003a")
         # vault: 256 over 512 along the south and north walls, sloped balustrades on the pit side
         kit.stairs(m, 3872, -512, -384, 4384, -224, -128, "-x", step=STEP, mat="metal/metalfloor003a")
         kit.stairs(m, 3872, 224, -384, 4384, 512, -128, "+x", step=STEP, mat="metal/metalfloor003a")
@@ -256,6 +274,7 @@ class BlackIce:
         dress_in.metro(self)
         dress_in.lobby(self)
         dress_in.server_vault(self)
+        dress_in.routes(self)
         dress_polish.shops(self)
         dress_polish.alleys(self)
         dress_polish.tower_extras(self)
@@ -321,8 +340,8 @@ def pack_list(b):
         pairs.append((f.resolve().relative_to(stage.resolve()).as_posix(), f))
     for f in sorted(custom_art.MATDIR.glob("*.v[mt][tf]")):
         pairs.append((f"materials/blackice/{f.name}", f))
-    if assets.model_exists("models/blackice/kuroda_monument.mdl"):
-        import monument
+    import monument
+    if assets.model_exists(monument.MODEL):
         pairs += monument.pack_pairs()
     return pairs
 

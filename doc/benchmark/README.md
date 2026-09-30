@@ -102,16 +102,25 @@ The model fixed all of them:
 - Annexes and cover narrow the plaza.
 - A solid layer in the closed gate blocks the lobby turrets.
 - Deckers now float down zero-g tubes behind team ICE.
-- A sub-agent modelled a Kuroda monument in Blender for the plaza.
+- A sub-agent modelled a Kuroda monument in Blender for the plaza (replaced by the tree in v1.3).
 
-The screenshots below show v1.2.
+**Third playtest (v1.3):** the user found the monument "a bit too aggressive with all the spikes" and asked
+for five other ideas. Five sub-agents sketched concepts in parallel in Blender, all on one shared stage
+(the same plaza stand-in and camera angles). The user picked the Fibre Tree, and the agent that designed it then
+built it as the real prop. The same round also made the gate meatspace-only, moved the decker pods and tube
+slopes outside the hall, made the tube glass visible from inside, and added alternative routes to objectives 2
+and 3 (a north service door into the hub, and a cooling plant route from the hub to the vault).
+
+![monument concepts](dys_blackice/monument_concepts.jpg)
+
+The screenshots below show v1.3.
 
 | | |
 |---|---|
 | ![street](dys_blackice/street.jpg) | ![plaza](dys_blackice/plaza.jpg) |
-| Market street, ending at the plaza's ad tower | Kuroda Plaza with the Kuroda monument |
+| Market street, ending at the plaza's ad tower | Kuroda Plaza with the fibre-optic Kuroda tree |
 | ![monument](dys_blackice/monument.jpg) | ![gate](dys_blackice/gate.jpg) |
-| Kuroda monument (Blender model by a sub-agent) | Obj 1: security gate, canopy turrets and guard posts |
+| The Kuroda tree (Blender model by a sub-agent) | Obj 1: security gate, canopy turrets and guard posts |
 | ![lobby](dys_blackice/lobby.jpg) | ![server hall](dys_blackice/server_hall.jpg) |
 | Tower lobby mezzanine | Server hall |
 | ![core vault](dys_blackice/core_vault.jpg) | ![cyberspace](dys_blackice/cyberspace.jpg) |
