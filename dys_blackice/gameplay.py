@@ -1,7 +1,7 @@
 """Gameplay layer for dys_blackice: spawns, objectives, logic, doors, screens, jackpoints.
 
 Objective chain (Punks attack, Corps defend):
-  1 GATE   meatspace override (10 s, Corps can abort) at the north guard post,
+  1 GATE   meatspace override (60 s, Corps can abort) at the north guard post,
            or instant hack from cyberspace (password ICE).        -> Neon Arcade spawn for Punks
   2 HUB    decker crack (trigger_crackable) in the Security Hub. -> lobby spawn flips, vault spawn opens
   3 CORE   final. Core is invulnerable while its shield is up. The shield drops for 40 s
@@ -10,7 +10,7 @@ Objective chain (Punks attack, Corps defend):
 from __future__ import annotations
 
 import kit
-from vmflib import VMF, box, ngon, NODRAW, TRIGGER, INVISIBLE
+from vmflib import VMF, box, ngon, NODRAW, TRIGGER, INVISIBLE, PLAYERCLIP
 
 PUNKS, CORPS = 2, 3
 FF_MAT = "termitex/t_forcefield"
@@ -85,6 +85,13 @@ def screen(m: VMF, cls, name, panel, x, y, z, facing, w=32, h=32, **kv):
                  width=str(w), height=str(h), reswidth="256", resheight="256", **kv)
 
 
+def turret(m: VMF, name, x, y, z, yaw, health=800):
+    """Corps ceiling turret, (x, y, z) 2u below the ceiling. 800 hp = 10 boltgun bolts (82 each)."""
+    return m.ent("npc_turret_ceiling", (x, y, z), targetname=name, angles=f"0 {yaw} 0", team=str(CORPS),
+                 maxhealth=str(health), minhealthdmg="30", spawnflags="0",
+                 model="models/Combine_turrets/Ceiling_turret.mdl")
+
+
 def relay(m: VMF, name, x, y, z, once=False):
     return m.ent("logic_relay", (x, y, z), targetname=name, spawnflags="1" if once else "0")
 
@@ -117,8 +124,12 @@ def add_gameplay(b):
         m.ent("dys_ammodisp", (x, y, z), angles=f"0 {yaw} 0")
 
     # --- spawn protection
-    forcefield(m, "ff_hq_stairs", -4488, -192, -384, -4480, 192, -64, PUNKS)
-    forcefield(m, "ff_hq_maint", -5120, 504, -384, -4992, 512, -224, PUNKS)
+    forcefield(m, "ff_hq_stairs", -4460, -192, -384, -4452, 192, -160, PUNKS)     # behind the arch lintel
+    forcefield(m, "ff_hq_maint", -5120, 528, -384, -4992, 536, -224, PUNKS)
+    # the metro tunnels are closed to everyone: forcefield + clip a little inside each mouth
+    for (i, x) in enumerate((-6048, -4456)):
+        forcefield(m, f"ff_tunnel{i}", x, -640, -448, x + 8, -256, -192, PUNKS)
+        m.add(box(x, -640, -448, x + 8, -256, -192, PLAYERCLIP))
     forcefield(m, "ff_arcade_front", -2176, 348, 0, -1920, 356, 160, PUNKS, start_disabled=True)
     forcefield(m, "ff_arcade_back", -1920, 956, 0, -1792, 964, 160, PUNKS, start_disabled=True)
     forcefield(m, "ff_lobby_1", 1868, -256, 192, 1876, -128, 320, CORPS)
@@ -148,7 +159,9 @@ def add_gameplay(b):
           PunksText="Drop the core shield", CorpsText="Keep the core shield up")
 
     # --- messages
-    msg(m, "msg_override", "GATE OVERRIDE IN PROGRESS - 10 SECONDS", "255 200 60")
+    msg(m, "msg_override", "GATE OVERRIDE IN PROGRESS - 60 SECONDS", "255 200 60")
+    msg(m, "msg_override30", "GATE OVERRIDE - 30 SECONDS", "255 200 60", hold=3)
+    msg(m, "msg_override10", "GATE OVERRIDE - 10 SECONDS", "255 140 40", hold=3)
     msg(m, "msg_abort", "GATE OVERRIDE ABORTED", "90 200 255")
     msg(m, "msg_gate", "THE SECURITY GATE HAS BEEN BREACHED", "255 120 40", hold=6)
     msg(m, "msg_hub", "SECURITY HUB COMPROMISED - DATAVAULT ACCESS OPEN", "255 120 40", hold=6)
@@ -159,12 +172,14 @@ def add_gameplay(b):
     msg(m, "msg_core", "BLACK ICE CORE CRASHED", "255 40 40", hold=8)
 
     # ============================================================ OBJ 1: gate
-    kit.gate(m, "gate1", 496, -192, 0, 528, 192, 256, "metal/metalgate001a", speed=48, lip=16)
-    # canopy over the gate with Corps turrets hanging from it
+    g = kit.gate(m, "gate1", 496, -192, 0, 528, 192, 256, "metal/metalgate001a", speed=48, lip=16)
+    # the lattice texture passes bullets and sight, and Dystopia turrets ignore toolsblock_los (tested), so an
+    # invisible solid layer inside the door stops lobby turrets from shooting through; it lifts with the gate
+    g.solids.append(box(508, -192, 0, 516, 192, 256, NODRAW))
+    # canopy over the gate approach with Corps turrets hanging from it
     m.detail(box(320, -256, 288, 448, 256, 304, "metal/metalwall003a"))
-    for i, y in enumerate((-160, 160)):
-        m.ent("npc_turret_ceiling", (384, y, 286), targetname="tur_plaza", angles="0 180 0", team=str(CORPS),
-              maxhealth="800", minhealthdmg="30", spawnflags="0", model="models/Combine_turrets/Ceiling_turret.mdl")
+    for y in (-160, 160):
+        turret(m, "tur_plaza", 384, y, 286, 180)
     # meatspace override screen inside the north guard post (north wall, facing south)
     scr = screen(m, "dys_screen", "gate_screen", "bi_gate_override", 288, 734, 72, "-y", w=40, h=40)
     scr.out("Button1", "gate_fp", "TestActivator")
@@ -180,7 +195,9 @@ def add_gameplay(b):
     r = relay(m, "gate_override", 300, 700, 64)
     r.out("OnTrigger", "msg_override", "Display")
     r.out("OnTrigger", "snd_override", "PlaySound")
-    r.out("OnTrigger", "gate_done", "Trigger", delay=10)
+    r.out("OnTrigger", "msg_override30", "Display", delay=30)
+    r.out("OnTrigger", "msg_override10", "Display", delay=50)
+    r.out("OnTrigger", "gate_done", "Trigger", delay=60)
     m.ent("ambient_generic", (288, 600, 120), targetname="snd_override", message="ambient/alarms/alarm1.wav",
           health="7", radius="1800", spawnflags="48", pitch="100", pitchstart="100")
     # cyberspace path (instant): wired in cyberspace() via 'cy_gate_fp'
@@ -272,14 +289,16 @@ def add_gameplay(b):
     r.out("OnTrigger", "msg_core", "Display")
     r.out("OnTrigger", "core_boom", "Explode")
     m.ent("env_explosion", (4128, 0, -200), targetname="core_boom", iMagnitude="0", spawnflags="1", fireballsprite="sprites/zerogxplode.spr")
-    # vault turrets
+    # vault + lobby turrets
     for y in (-256, 256):
-        m.ent("npc_turret_ceiling", (4128, y, 318), targetname="tur_vault", angles="0 180 0", team=str(CORPS),
-              maxhealth="800", minhealthdmg="30", spawnflags="0", model="models/Combine_turrets/Ceiling_turret.mdl")
+        turret(m, "tur_vault", 4128, y, 318, 180)
     for y in (-448, 448):
-        m.ent("npc_turret_ceiling", (1216, y, 446), targetname="tur_lobby", angles=f"0 {90 if y < 0 else 270} 0",
-              team=str(CORPS), maxhealth="600", minhealthdmg="30", spawnflags="0",
-              model="models/Combine_turrets/Ceiling_turret.mdl")
+        turret(m, "tur_lobby", 1216, y, 446, 90 if y < 0 else 270)
+    # A freshly spawned npc_turret_ceiling ignores all damage until it receives Enable (verified in-game);
+    # after that one boltgun bolt deals 82, so 800 hp = 10 bolts. Rebuilt turrets stay damageable.
+    la = m.ent("logic_auto", (4000, 320, 0), spawnflags="0")
+    for name in ("tur_plaza", "tur_lobby", "tur_vault"):
+        la.out("OnMapSpawn", name, "Enable", delay=0.5)
 
     # maintenance door (server hall south) - opened from cyberspace, but only once the hub has fallen
     # (otherwise Punks could skip objective 2 and reach the vault early)
@@ -312,8 +331,8 @@ PANELS = [
      "background": "vgui/screens/secorp_bg1"},
     {"name": "bi_cyber_gate", "type": "dys_cyberscreen", "title": "GATE LOCK",
      "buttons": [("#dystopia_R_OpenDoors", "button1")], "background": "vgui/screens/cyberpanel_bg"},
-    {"name": "bi_cyber_plaza", "type": "dys_cyberscreen", "title": "#dystopia_R_TurretControl",
-     "buttons": [("Enable", "button1"), ("Disable", "button2"), ("#dystopia_R_CaptureTurrets", "button3")],
+    {"name": "bi_cyber_gateturrets", "type": "dys_cyberscreen", "title": "#dystopia_R_TurretControl",
+     "buttons": [("Disable", "button1"), ("Enable", "button2")],
      "background": "vgui/screens/cyberpanel_bg"},
     {"name": "bi_cyber_core", "type": "dys_cyberscreen", "title": "BLACK ICE SHIELD",
      "buttons": [("#dystopia_R_DisableCore", "button1"), ("#dystopia_R_EnableCore", "button2")],

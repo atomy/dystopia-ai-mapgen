@@ -4,7 +4,7 @@ from __future__ import annotations
 import random
 
 import kit
-from dress import neon, panel, blade, wall_overlay, floor_overlay, shutter, FACING
+from dress import neon, panel, blade, wall_overlay, floor_overlay, wall_lamp, FACING
 from vmflib import VMF, Tex, box, ngon, NODRAW
 
 
@@ -54,9 +54,19 @@ def metro(b):
     # platform edge hazard strip (walkable, 2u)
     m.detail(box(-6016, -256, F, -4480, -236, F + 2, {"all": "concrete/concretewall008a",
                                                       "top": Tex("props/hazardstrip001a", scale=0.3125)}))
-    # rails in the track bed
+    # rails in the track bed, running on into both tunnels
+    tw, te = b.TUNNEL_W, b.TUNNEL_E
     for y in (-520, -376):
-        m.detail(box(-6272, y - 3, -448, -4224, y + 3, -440, "metal/metaltrack001a"))
+        m.detail(box(tw + 8, y - 3, -448, te - 8, y + 3, -440, "metal/metaltrack001a"))
+    # tunnels: sleepers every 64u, dim lamps that fade out, black far ends
+    for x in range(int(tw) + 32, int(te) - 32, 64):
+        if -6016 <= x <= -4480:
+            continue
+        m.detail(box(x - 8, -560, -448, x + 8, -336, -444, "concrete/concretefloor008a"))
+    for x in (-6400, -7000, -4050, -3550):
+        wall_lamp(m, x, -256, -250, "-y", (255, 120, 60), bright=45, glow=0.15)
+    for x in (tw, te - 8):
+        m.detail(box(x, -640, -448, x + 8, -256, -192, "tools/toolsblack"))
     # derelict train car on the tracks
     cx0, cx1, cy0, cy1 = -5600, -4880, -600, -296
     body = {"all": "metal/metalwall002a", "top": "metal/metalwall003a"}
@@ -71,15 +81,16 @@ def metro(b):
     for i, x in enumerate(range(-5888, -4600, 256)):
         for y in (40, 320):
             tube(m, x, y, -72, style=10 if (i * 7 + y) % 5 == 0 else None)
-    # red emergency lights at the tunnel mouths
-    for (x, y) in [(-6144, -448), (-4352, -448)]:
-        kit.light(m, x, y, -240, color=(255, 30, 20), bright=90)
-        kit.sprite(m, x, y + 150, -212, color=(255, 30, 20), scale=0.3, alpha=150)
+    # red emergency lamps at the tunnel mouths
+    for x in (-6096, -4400):
+        wall_lamp(m, x, -256, -236, "-y", (255, 30, 20), bright=110)
     # signage
     neon(m, -4736, 510, -276, -148, "-y", 128, "neon/s_neon_monorail", (80, 200, 255), bright=240, reach=260)
     for x in (-5376, -5632):
         neon(m, x, 510, -250, -218, "-y", 96, "detonate/exo_pubjipneon", (80, 255, 120), bright=120, reach=150, sprite=False)
-    panel(m, -4482, 0, -150, -118, "-x", 128, "props/sign_trainstation03", depth=2)
+    # lintel over the stairwell arch carries the station sign (in front of the spawn forcefield)
+    m.detail(box(-4480, -192, -160, -4464, 192, -64, {"all": "tile/tilewall006b", "bottom": "concrete/concreteceiling004a"}))
+    panel(m, -4480, 0, -150, -118, "-x", 128, "props/sign_trainstation03", depth=2)
     kit.light(m, -4520, 0, -130, color=(200, 220, 255), bright=135)
     # benches, bins, a vending machine
     for x in (-5888, -5504, -5120 + 256, -4864):
@@ -93,12 +104,13 @@ def metro(b):
     for (x, mat) in [(-5760, "graffiti/decal_graffiti_space"), (-5008, "graffiti/decal_graffiti_vice"),
                      (-4880, "decals/decal_posters002a"), (-6000 + 40, "graffiti/decal_graffiti_rage")]:
         wall_overlay(m, mat, x, 512, F + 150, "-y", 128, 128)
-    # stairwell: blue accent lights up the flight
-    for i, x in enumerate(range(-4400, -3920, 128)):
-        kit.light(m, x, 170, -300 + i * 96, color=(90, 170, 255), bright=135)
-    # maintenance tunnel: dim cage lights
-    for (x, y, z) in [(-5056, 700, -240), (-4700, 1024, -240), (-4200, 1088, -240), (-4200, 1088, -120)]:
-        kit.light(m, x, y, z, color=(255, 190, 120), bright=120)
+    # stairwell: blue accent lights up the flight (stairs rise 1:2 from x=-4448)
+    for x in range(-4400, -3700, 128):
+        kit.light(m, x, 170, -384 + (x + 4448) / 2 + 96, color=(90, 170, 255), bright=135)
+    # maintenance tunnel: caged lamps, then up the flight (rises 1:2 from x=-4736)
+    wall_lamp(m, -4992, 780, -270, "-x", (255, 190, 120), bright=120)
+    for x in (-4600, -4300, -4050):
+        wall_lamp(m, x, 1152, -384 + (x + 4736) / 2 + 110, "-y", (255, 190, 120), bright=120)
 
 
 # ============================================================================ tower lobby
@@ -162,7 +174,7 @@ def lobby(b):
               spawnflags="1")
     # corps spawn: lockers + lights
     for y in range(-448, 449, 64):
-        if abs(y) < 96:
+        if abs(y) < 96 or 160 < abs(y) < 352:      # keep the jack-in terminals at y +-256 clear
             continue
         kit.prop(m, "models/props_lab/lockers.mdl", 2410, y, 192, yaw=180, solid=6)
     for (x, y) in [(2000, -256), (2000, 256), (2300, 0)]:
@@ -239,11 +251,11 @@ def server_vault(b):
     for (x, y) in ((3790, -480), (3790, 480)):
         kit.sprite(m, x, y, 24, color=(120, 230, 255), scale=0.6, alpha=160)
         kit.light(m, x, y, 40, color=(100, 220, 255), bright=205)
-    # railings around the pit (gaps at the stairs)
-    rail_glass(m, 4064, -224, 4352, -224, -128)
-    rail_glass(m, 3904, 224, 4192, 224, -128)
+    # railings on the walkway edges (the stairs along the walls have their own balustrades)
     rail_glass(m, 3904, -224, 3904, 224, -128)
     rail_glass(m, 4352, -224, 4352, 224, -128)
+    rail_glass(m, 4384, -512, 4384, -224, -128)
+    rail_glass(m, 3872, 224, 3872, 512, -128)
     # alarm lights (off until the shield drops)
     for (x, y) in ((3760, -480), (3760, 480), (4496, -480), (4496, 480)):
         kit.light(m, x, y, 200, color=(255, 30, 30), bright=410, name="vault_alarm", spawnflags="1")

@@ -12,6 +12,7 @@ player-facing readme that ships with the map.
 - Dystopia installed at `M:\SteamLibrary\steamapps\common\Dystopia` (paths live in `tools.py` and `assets.py`)
 - Source SDK Base 2013 Multiplayer, used only for `bspzip.exe`
 - Python 3.12 + Pillow; Steam running for in-game tests
+- Blender 5.x, only to rebuild the monument model (`python monument.py`)
 
 ## Build
 ```
@@ -31,9 +32,10 @@ python release.py qa | logic | shots | loading | zip        # QA and release ste
 | `look.py` | Per-zone material recipes + the CSG face resolver |
 | `blackice.py` | The level: shell layout, stairs, build orchestration, cubemap placement, packing |
 | `gameplay.py` | Spawns, objectives, gate/hub/core logic, forcefields, turrets, jack-in terminals, screen panels |
-| `cyberspace.py` | Cyberspace node network, ICE-guarded terminals |
+| `cyberspace.py` | Cyberspace hall: core terrace, entry pads, terminal houses whose doors are the ICE |
 | `dress.py`, `dress_in.py`, `dress_polish.py` | Street, plaza, interiors, lighting, props, signage, weather |
 | `sky3d.py` | 3D skybox megacity skyline |
+| `monument.py`, `monument/` | Kuroda monument prop: Blender build script, SMD exporter, textures, QC (see monument/README.md) |
 | `custom_art.py` | Custom textures (Pillow -> vtex) |
 | `extras.py` | Radar overview, mappaths, soundscapes, music, loading screen |
 | `panels.py` | dys_screen / dys_cyberscreen VGUI panels |

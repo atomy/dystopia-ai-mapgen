@@ -3,7 +3,7 @@
 python release.py qa       -> clean-client test (loose custom files hidden, pak only)
 python release.py shots    -> beauty screenshots (1920x1080, no HUD)
 python release.py loading  -> rebuild loading screen from the best beauty shot and repack
-python release.py zip      -> build/release/dys_blackice_v1.0.zip (+ source zip)
+python release.py zip      -> build/release/dys_blackice_v<VERSION>.zip (+ source zip)
 """
 from __future__ import annotations
 
@@ -18,9 +18,10 @@ import extras
 import tools
 
 NAME = "dys_blackice"
-VERSION = "1.0"
+VERSION = "1.2"
 LOOSE = [tools.GAME / "materials" / "blackice", *(tools.GAME / "materials" / "overviews").glob(f"{NAME}_*"),
-         tools.GAME / "materials" / "loading" / f"{NAME}.vtf"]
+         tools.GAME / "materials" / "loading" / f"{NAME}.vtf", tools.GAME / "models" / "blackice",
+         tools.GAME / "materials" / "models" / "blackice"]
 HIDE = tools.BUILD / "hidden_loose"
 
 
@@ -29,7 +30,7 @@ def hide_loose():
     moved = []
     for p in LOOSE:
         if p.exists():
-            dst = HIDE / p.name
+            dst = HIDE / p.relative_to(tools.GAME).as_posix().replace("/", "__")    # unique: several are "blackice"
             if dst.exists():
                 shutil.rmtree(dst) if dst.is_dir() else dst.unlink()
             shutil.move(str(p), str(dst))
@@ -57,7 +58,7 @@ def qa():
             # meatspace gate screen (north guard post, north wall)
             g.cmd("setpos 288 560 57", "setang 5 90 0", sleep=2.5)
             shots.append(g.shot("qa_gate_screen"))
-            # jack in at the metro and look at the gate node terminals
+            # jack in at the metro: lands on the Punk entry pad in the cyberspace hall
             g.cmd("setpos -5376 474 -327", "setang 5 90 0", sleep=1.5)
             g.cmd("+use", sleep=2.5)
             g.cmd("-use", sleep=4.0)
@@ -75,7 +76,7 @@ def logic():
     with tools.GameSession(NAME, width=1280, height=720) as g:
         g.cmd("sv_cheats 1", "developer 2", "mp_instantspawn 1", "jointeam 2", sleep=5.0)
         g.cmd("echo QA_MAINT_EARLY", "ent_fire maint_open Trigger", sleep=2.0)
-        g.cmd("echo QA_GATE", "ent_fire gate_fp TestActivator", sleep=12.0)
+        g.cmd("echo QA_GATE", "ent_fire gate_fp TestActivator", sleep=64.0)     # 60 s override
         g.cmd("echo QA_HUB", "ent_fire hub_done Trigger", sleep=3.0)
         g.cmd("echo QA_MAINT_LATE", "ent_fire maint_open Trigger", sleep=2.0)
         g.cmd("echo QA_SHIELD", "ent_fire shield_down Trigger", sleep=2.0)
@@ -96,13 +97,14 @@ def logic():
 
 BEAUTY = [
     ("hero_street", -3380, -60, 150, -14, 2),
-    ("hero_plaza", -1560, -40, 120, -22, 2),
+    ("hero_plaza", -800, -260, 30, -18, 30),
+    ("hero_monument", -760, -120, 10, -20, 18),
     ("hero_tower_low", -300, -520, 40, -35, 12),
     ("hero_metro", -5980, 430, -300, 2, -18),
     ("hero_lobby", 640, -700, 250, 12, 40),
     ("hero_servers", 2600, -300, 40, 3, 10),
     ("hero_vault", 4480, -470, 40, 22, 145),
-    ("hero_cyber", -1792, 3900, 100, 0, 90),
+    ("hero_cyber", 1500, 3700, 520, 16, 150),
     ("hero_alley", -1760, 1150, 330, 14, 185),
     ("hero_arcade", -2270, 470, 160, 12, 30),
 ]
@@ -133,8 +135,12 @@ def make_zip():
         zf.write(tools.MAPS / f"{NAME}.vmf", f"mapsrc/{NAME}.vmf")
         for p in sorted(tools.SRC.glob("*.py")) + [tools.SRC / "PLAN.md", tools.SRC / "README_release.txt"]:
             zf.write(p, f"generator/{p.name}")
-        for p in sorted((tools.GAME / "materialsrc" / "blackice").glob("*")):
-            zf.write(p, f"materialsrc/blackice/{p.name}")
+        for p in sorted((tools.SRC / "monument").glob("*.*")):
+            if p.suffix in (".py", ".qc", ".md"):
+                zf.write(p, f"generator/monument/{p.name}")
+        for sub in ("blackice", "models/blackice"):
+            for p in sorted((tools.GAME / "materialsrc" / sub).glob("*")):
+                zf.write(p, f"materialsrc/{sub}/{p.name}")
     return z, zs
 
 

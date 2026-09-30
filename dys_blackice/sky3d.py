@@ -34,7 +34,7 @@ def tower(m: VMF, cx, cy, w, d, h, base_z, mat, tex_scale, crown=True, rng=None)
     if crown:
         m.add(box(cx - w / 3, cy - d / 3, base_z + h, cx + w / 3, cy + d / 3, base_z + h + 6,
                   {"all": Tex("vaccinert/dys_vacextwall4", scale=0.0625, lightmap=64), "bottom": NODRAW}))
-        kit.sprite(m, cx, cy, base_z + h + 10, color=(255, 30, 30), scale=0.12, alpha=220)
+        kit.sprite(m, cx, cy, base_z + h + 7, color=(255, 30, 30), scale=0.12, alpha=220)   # on the crown
 
 
 def add(b):
@@ -91,4 +91,8 @@ def add(b):
         m.brush_ent("func_brush", box(x - 0.5, y - 40, ground + 110, x + 0.5, y + 40, ground + 150,
                                       {"all": NODRAW, face: Tex(mat, scale=80 / 256)}),
                     Solidity="1", solidbsp="0", StartDisabled="0", disableshadows="1", spawnflags="2", InputFilter="0")
+        # on a steel mast with a frame, not hanging in the sky
+        m.detail([box(x - 1.5, y - 1.5, ground, x + 1.5, y + 1.5, ground + 110, "metal/metalwall003a"),
+                  box(x - 1, y - 41, ground + 108, x + 1, y + 41, ground + 110, "metal/metalwall003a"),
+                  box(x - 1, y - 41, ground + 150, x + 1, y + 41, ground + 152, "metal/metalwall003a")])
     return len(placed)

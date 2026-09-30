@@ -4,7 +4,7 @@ from __future__ import annotations
 import random
 
 import kit
-from dress import neon, panel, blade, wall_overlay, floor_overlay
+from dress import neon, panel, blade, wall_overlay, floor_overlay, wall_lamp
 from vmflib import VMF, Tex, box, NODRAW, PLAYERCLIP
 
 
@@ -17,15 +17,17 @@ def shops(b):
     for x in (-3290, -3240, -3190):
         kit.prop(m, "models/props_c17/chair_stool01a.mdl", x, 560, 0, yaw=90, solid=6)
     for x in (-3240, -3060):
-        kit.light(m, x, 520, 190, color=(255, 170, 110), bright=90)
-        kit.sprite(m, x, 520, 200, color=(255, 170, 110), scale=0.3, alpha=120)
+        kit.prop(m, "models/props_c17/light_domelight02_on.mdl", x, 520, 222, solid=0, on_floor=False)
+        kit.light(m, x, 520, 196, color=(255, 170, 110), bright=90)
+        kit.sprite(m, x, 520, 213, color=(255, 170, 110), scale=0.25, alpha=120)
     neon(m, -3232, 702, 130, 194, "-y", 128, "neon/neon_thdsm", (255, 70, 90), bright=40, reach=160, sprite=False)
     # --- DATASMITH electronics (x -3072..-2560, y -704..-320), back door x -2688..-2560
     for y in (-660, -590, -520, -450):
         kit.prop(m, "models/props/cs_office/shelves_metal.mdl", -3056, y, 0, yaw=0, solid=6)
     m.detail(box(-2900, -560, 0, -2780, -520, 40, {"all": "vaccinert/dys_vacextwall4", "top": "metal/metalwall003a"}))
-    for x in (-2880, -2820):
-        kit.prop(m, "models/props/monitor01.mdl", x, -540, 40, yaw=270, solid=0)
+    for x in (-2872, -2808):
+        kit.prop(m, "models/termi/t_monitor.mdl", x, -548, 40, yaw=90, solid=0)
+        kit.prop(m, "models/props_c17/computer01_keyboard.mdl", x, -528, 40, yaw=90, solid=0)
     kit.light(m, -2816, -512, 190, color=(170, 210, 255), bright=110)
     neon(m, -2816, -702, 120, 184, "+y", 256, "neon/neon_datasmith", (255, 90, 200), bright=35, reach=150, sprite=False)
     # --- NetExcess arcade (punk fwd spawn, x -2304..-1792, y 384..896, z 0..288)
@@ -46,24 +48,30 @@ def alleys(b):
     # fire escape grating panels + drain pipes on the rear facades of the market blocks
     for x in (-3300, -2900, -2500, -2100):
         for z in (224, 416, 608):
+            if (x, z) == (-2500, 224):
+                continue                # would hang over the fire-escape flight
             m.brush_ent("func_brush", box(x - 96, 1024, z, x + 96, 1072, z + 8,
                                           {"all": "metal/metalwall003a", "top": "metal/metalfireescape002a"}),
                         Solidity="2", solidbsp="0", StartDisabled="0", spawnflags="2", InputFilter="0")
             kit.rail(m, x - 96, 1070, x + 96, 1070, z + 8, h=36, mat="metal/metalwall003a")
-    for x in (-3600, -3050, -2350, -1900):
-        kit.prop(m, "models/props_pipes/pipecluster08d_006a.mdl", x, 1032, 255, yaw=0, solid=0, on_floor=False)
-        kit.prop(m, "models/props_pipes/pipecluster08d_006a.mdl", x + 150, -1032, 255, yaw=180, solid=0, on_floor=False)
+    # pipe bundles lie flat against solid wall (never across a door or passage); 243 wide, 511 tall
+    for (x, y, fac) in [(-3700, 1024, "+y"), (-3050, 1216, "-y"), (-3450, -1024, "-y"), (-2950, -1024, "-y"),
+                        (-2200, -1024, "-y"), (-1800, -1024, "-y")]:
+        f = 1 if fac == "+y" else -1
+        kit.prop(m, "models/props_pipes/pipecluster08d_006a.mdl", x, y + f * 7, 256, yaw=90, solid=0, on_floor=False)
     for (x, y, mat) in [(-3400, 1216, "graffiti/decal_graffiti_bash"), (-2700, 1216, "graffiti/decal_graffiti_sista"),
                         (-3000, -1216, "graffiti/decal_graffiti_die"), (-2200, -1216, "decals/decal_posters005a")]:
         wall_overlay(m, mat, x, y, 90, "-y" if y > 0 else "+y", 160, 160)
     for (x, y) in [(-3300, 1120), (-2500, 1140), (-3100, -1110), (-2400, -1120)]:
         floor_overlay(m, "overlays/puddle001a", x, y, 0, 200, 140, yaw=rng.randint(0, 180))
-    # readable flank lighting: cage lights over back doors + neon arrows toward the plaza
-    for (x, y, c) in [(-3800, 1120, (255, 150, 90)), (-3072, 1120, (120, 190, 255)), (-2350, 1120, (255, 120, 200)),
-                      (-1800, 1120, (255, 170, 90)), (-3700, -1120, (255, 150, 90)), (-2624, -1120, (120, 190, 255)),
-                      (-1900, -1120, (255, 120, 200))]:
-        kit.light(m, x, y, 170, color=c, bright=150)
-        kit.sprite(m, x, y + (90 if y > 0 else -90), 180, color=c, scale=0.3, alpha=140)
+    # readable flank lighting: caged wall lamps over the back doors and along the walls
+    for (x, y, fac, c) in [(-3800, 1216, "-y", (255, 150, 90)), (-3072, 1024, "+y", (120, 190, 255)),
+                           (-2860, 1216, "-y", (255, 120, 60)), (-2350, 1216, "-y", (255, 120, 200)),
+                           (-1856, 1024, "+y", (255, 170, 90)),
+                           (-3700, -1216, "+y", (255, 150, 90)), (-3300, -1216, "+y", (255, 80, 160)),
+                           (-2624, -1024, "-y", (120, 190, 255)), (-2200, -1216, "+y", (255, 170, 80)),
+                           (-1900, -1216, "+y", (255, 120, 200))]:
+        wall_lamp(m, x, y, 196, fac, c)
     for (x, y, fac) in [(-2600, 1214, "-y"), (-2000, 1214, "-y")]:
         neon(m, x, y, 150, 214, fac, 128, "decals/sign_arrow_tech", (90, 220, 255), bright=40, reach=160, sprite=False)
 

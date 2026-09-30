@@ -30,6 +30,8 @@ from vmflib import VMF, Tex, box, SKYBOX, NODRAW, BLACK, PLAYERCLIP
 
 NAME = "dys_blackice"
 TEST_BUILD = "--test" in sys.argv
+TUNNEL_W, TUNNEL_E = -7680, -2944       # far ends of the metro tunnels (x)
+STEP = 8                                # stair risers: 8u on 16u treads (1:2) everywhere
 
 PUNKS, CORPS = 2, 3
 
@@ -37,6 +39,8 @@ PUNKS, CORPS = 2, 3
 
 
 class BlackIce:
+    TUNNEL_W, TUNNEL_E = TUNNEL_W, TUNNEL_E
+
     def __init__(self):
         self.L = Level(cell=512)
         self.m = VMF(skyname="exosky_01", detailvbsp="detail.vbsp", detailmaterial="detail/detailsprites",
@@ -62,6 +66,10 @@ class BlackIce:
         for (x0, x1, st) in [(-3968, -3456, "bld_dark"), (-3456, -3072, "bld_grid"), (-3072, -2560, "bld_brick"),
                              (-2560, -2048, "bld_cement"), (-2048, -1664, "bld_rust")]:
             S(x0, -960, 0, x1, -320, 1280, st)               # market south blocks
+        # recessed niches for the roller shutters (shutter panel sits at the back)
+        for (cx, fy, fac, w, mat) in dress.SHUTTERS:
+            back = fy + (dress.NICHE if fac == "-y" else -dress.NICHE)   # into the building
+            A(cx - w // 2 - 8, min(fy, back), 0, cx + w // 2 + 8, max(fy, back), 160, "niche")
         S(-3968, 1216, 0, -1664, 1792, 1280, "bld_grid")     # beyond north alley
         S(-3968, -1792, 0, -1664, -1216, 1280, "bld_cement") # beyond south alley
         S(-1664, 1216, 0, 448, 1792, 1280, "bld_grid")       # plaza north office block
@@ -71,16 +79,18 @@ class BlackIce:
         # ---------------- Zone A: metro station (Punk HQ), platform z=-384
         A(-6016, -256, -384, -4480, 512, -64, "metro")          # platform hall
         A(-6016, -640, -448, -4480, -256, -64, "metro_tracks")  # track bed (64 lower)
-        A(-6272, -640, -448, -6016, -256, -192, "metro_tracks") # west tunnel mouth
-        A(-4480, -640, -448, -4224, -256, -192, "metro_tracks") # east tunnel mouth
-        # main stairwell up to street level (rises +x), 384 wide
-        A(-4480, -192, -384, -3904, 192, 224, "metro_stair")
+        # the line runs on into long dark tunnels both ways (forcefields keep players out)
+        S(TUNNEL_W - 256, -896, -704, -6400, 0, 0, "rock")      # rock around the west tunnel, beyond the city block
+        A(TUNNEL_W, -640, -448, -6016, -256, -192, "metro_tunnel")
+        A(-4480, -640, -448, TUNNEL_E, -256, -192, "metro_tunnel")
+        # main stairwell up to street level (short landing, then rises +x into the kiosk), 384 wide
+        A(-4480, -192, -384, -3680, 192, 224, "metro_stair")
         # metro entrance kiosk at street level, opens onto the street
         A(-3904, -288, 0, -3456, 288, 320, "metro_stair")
         # maintenance tunnel: platform -> north -> up to the back alley
         A(-5120, 512, -384, -4992, 1152, -224, "maint")
-        A(-5120, 1024, -384, -4544, 1152, -224, "maint")
-        A(-4544, 1024, -384, -3968, 1152, 128, "maint")         # stair hall rising +x into the alley
+        A(-5120, 1024, -384, -4736, 1152, -224, "maint")
+        A(-4736, 1024, -384, -3968, 1152, 128, "maint")         # stair hall rising +x into the alley
 
         # ---------------- Zone B: market street (outdoor) z=0
         A(-3456, -320, 0, -1664, 320, 1280, "street")
@@ -105,6 +115,9 @@ class BlackIce:
 
         # ---------------- Zone C: Kuroda Plaza (outdoor)
         A(-1664, -1216, 0, 448, 1216, 1280, "plaza")
+        # two-storey annexes narrow the middle of the plaza (fewer long sight lines)
+        S(-1216, 928, 0, -320, 1216, 448, "bld_grid")
+        S(-1216, -1216, 0, -320, -928, 448, "bld_cement")
         A(-896, -448, -64, -128, 448, 0, "court")               # sunken court
         # guard posts (interiors) against the tower facade
         S(128, 384, 0, 448, 768, 256, "guardpost")
@@ -150,10 +163,11 @@ class BlackIce:
         # maintenance flank: south mezz -> corridor -> down to server hall south side
         A(1216, -1024, 192, 1344, -768, 320, "maint")           # door off south mezz
         A(1216, -1152, 192, 2688, -1024, 320, "maint")          # corridor east
-        A(2560, -1152, -128, 2688, -768, 320, "maint")          # shaft with stairs down (rises -y)
+        A(1920, -1152, -128, 2688, -1024, 320, "maint")         # corridor stairs down (descending +x)
+        A(2560, -1152, -128, 2688, -768, 320, "maint")          # shaft bottom -> maintenance door
 
         # ---------------- Zone E: server hall (floor z=-128)
-        A(2432, -192, -128, 2560, 192, 160, "service")          # stair from service lobby down to hall
+        A(2304, -192, -128, 2560, 192, 160, "service")          # stairwell from service lobby down to hall
         A(2560, -640, -128, 3712, 640, 192, "server")
         A(2560, -768, -128, 2688, -640, 32, "maint")            # maintenance door into hall (south wall)
 
@@ -161,13 +175,13 @@ class BlackIce:
         A(3744, -512, -384, 4512, 512, 320, "vault")
         A(3712, -448, -128, 3744, -320, 0, "vault")             # door S from server hall
         A(3712, 320, -128, 3744, 448, 0, "vault")               # door N from server hall
-        # ring walkway at z=-128 around a central pit
-        S(3744, -512, -144, 3904, -224, -128, "slab")      # south walkway (gap over the stairs)
-        S(4064, -512, -144, 4512, -224, -128, "slab")
-        S(3744, 224, -144, 4192, 512, -128, "slab")        # north walkway (gap over the stairs)
-        S(4352, 224, -144, 4512, 512, -128, "slab")
-        S(3744, -224, -144, 3904, 224, -128, "slab")
-        S(4352, -224, -144, 4512, 224, -128, "slab")
+        # walkways at z=-128 on the west and east sides; long stairs run down along the south and north walls
+        S(3744, -512, -144, 3872, -224, -128, "slab")      # SW corner (top of the south stair)
+        S(4384, -512, -144, 4512, -224, -128, "slab")      # SE corner
+        S(3744, 224, -144, 3872, 512, -128, "slab")        # NW corner
+        S(4384, 224, -144, 4512, 512, -128, "slab")        # NE corner (top of the north stair)
+        S(3744, -224, -144, 3904, 224, -128, "slab")       # west walkway
+        S(4352, -224, -144, 4512, 224, -128, "slab")       # east walkway
 
         # ---------------- Zone G: corps final spawn
         A(4544, -384, -128, 5056, 384, 128, "corpspawn")
@@ -182,29 +196,43 @@ class BlackIce:
     # ------------------------------------------------------------------ geometry details needed for grey-box play
     def details(self):
         m = self.m
-        # metro main stairs: 384 rise over 576 run
-        kit.stairs(m, -4480, -192, -384, -3904, 192, 0, "+x", step=16, mat="termireal1/t_trashfloor", riser="dys_nameless/concrete_004_blue")
-        # maintenance: straight flight from the tunnel (-384) up into the north alley (0)
-        kit.stairs(m, -4544, 1024, -384, -3968, 1152, 0, "+x", mat="metal/metalfloor_001e", riser="dys_fortress/tunnel_wall")
-        # fire escape: alley (0) -> walkway (320) along the north block's back wall, rising -x
-        kit.stairs(m, -2240, 1024, 0, -1728, 1120, 320, "-x", mat="metal/metalgrate011a", riser="metal/metalwall003a")
-        m.detail(box(-2304, 1024, 304, -2240, 1120, 320, {"all": "metal/metalwall003a", "top": "metal/metalgrate011a"}))
-        kit.rail(m, -2304, 1122, -1728, 1122, 0, h=40, mat="metal/metalwall003a")      # outer rail along the flight
-        kit.rail(m, -2306, 1024, -2306, 1120, 304, h=40, mat="metal/metalwall003a")    # landing end rail
-        kit.clip_box(m, -2310, 1120, 0, -1728, 1126, 400)
-        # sunken court steps (plaza level 0 -> -64)
-        kit.stairs(m, -896, -448, -64, -832, 448, 0, "-x", mat="stone/stonefloor011a", riser="concrete/concretewall060c")
-        kit.stairs(m, -192, -448, -64, -128, 448, 0, "+x", mat="stone/stonefloor011a", riser="concrete/concretewall060c")
-        # lobby stairs to mezzanines (0 -> 192)
-        kit.stairs(m, 1152, 192, 0, 1280, 480, 192, "+y", mat="vaccinert/dys_vaccorpfloor3", riser="vaccinert/dys_vactrim2")
-        kit.stairs(m, 1152, -480, 0, 1280, -192, 192, "-y", mat="vaccinert/dys_vaccorpfloor3", riser="vaccinert/dys_vactrim2")
-        # service stair down into server hall (0 -> -128), descending +x
-        kit.stairs(m, 2432, -192, -128, 2560, 192, 0, "-x", mat="metal/metalfloor003a")
-        # maintenance shaft down to server hall level (192 -> -128), descending +y (rises -y)
-        kit.stairs(m, 2560, -1152, -128, 2688, -768, 192, "-y", mat="metal/metalfloor003a")
-        # vault: stairs from walkway (-128) down to floor (-384)
-        kit.stairs(m, 3904, -512, -384, 4064, -224, -128, "-x", mat="metal/metalfloor003a")
-        kit.stairs(m, 4192, 224, -384, 4352, 512, -128, "+x", mat="metal/metalfloor003a")
+        # every flight uses 8u risers on 16u treads (1:2, ~27 degrees)
+        # metro main stairs: landing inside the arch, then 384 rise over 768 run up into the kiosk
+        kit.stairs(m, -4448, -192, -384, -3680, 192, 0, "+x", step=STEP, mat="termireal1/t_trashfloor",
+                   riser="dys_nameless/concrete_004_blue")
+        for y in (-194, 194):                                   # kiosk railings along the stair opening
+            kit.rail(m, -3904, y, -3680, y, 0, h=40, mat="metal/metalwall003a")
+        # maintenance: 384 over 768 from the tunnel up into the north alley
+        kit.stairs(m, -4736, 1024, -384, -3968, 1152, 0, "+x", step=STEP, mat="metal/metalfloor_001e",
+                   riser="dys_fortress/tunnel_wall")
+        # fire escape: west of the arcade back door, alley (0) -> landing (320) beside the roof walkway
+        kit.stairs(m, -2944, 1024, 0, -2304, 1120, 320, "+x", step=STEP, mat="metal/metalgrate011a",
+                   riser="metal/metalwall003a")
+        m.detail(box(-2304, 1024, 304, -2176, 1120, 320, {"all": "metal/metalwall003a", "top": "metal/metalgrate011a"}))
+        kit.stringer(m, -2944, 1122, -2304, 1122, 0, 0, 320)                       # outer side of the flight
+        kit.rail(m, -2304, 1122, -2176, 1122, 320, h=40, mat="metal/metalwall003a")    # landing rails
+        kit.rail(m, -2178, 1024, -2178, 1120, 320, h=40, mat="metal/metalwall003a")
+        # sunken court steps (plaza level 0 -> -64): 64 over 128 at both ends
+        kit.stairs(m, -896, -448, -64, -768, 448, 0, "-x", step=STEP, mat="stone/stonefloor011a",
+                   riser="concrete/concretewall060c")
+        kit.stairs(m, -256, -448, -64, -128, 448, 0, "+x", step=STEP, mat="stone/stonefloor011a",
+                   riser="concrete/concretewall060c")
+        # lobby stairs to the mezzanines: 192 over 384
+        kit.stairs(m, 1152, 96, 0, 1280, 480, 192, "+y", step=STEP, mat="vaccinert/dys_vaccorpfloor3",
+                   riser="vaccinert/dys_vactrim2")
+        kit.stairs(m, 1152, -480, 0, 1280, -96, 192, "-y", step=STEP, mat="vaccinert/dys_vaccorpfloor3",
+                   riser="vaccinert/dys_vactrim2")
+        # service stairwell: 128 over 256, from the service lobby down into the server hall
+        kit.stairs(m, 2304, -192, -128, 2560, 192, 0, "-x", step=STEP, mat="metal/metalfloor003a")
+        for y in (-194, 194):
+            kit.rail(m, 2304, y, 2432, y, 0, h=40, mat="metal/metalwall003a")
+        # maintenance corridor: 320 over 640 descending east, then flat through the shaft to the door
+        kit.stairs(m, 1920, -1152, -128, 2560, -1024, 192, "-x", step=STEP, mat="metal/metalfloor003a")
+        # vault: 256 over 512 along the south and north walls, sloped balustrades on the pit side
+        kit.stairs(m, 3872, -512, -384, 4384, -224, -128, "-x", step=STEP, mat="metal/metalfloor003a")
+        kit.stairs(m, 3872, 224, -384, 4384, 512, -128, "+x", step=STEP, mat="metal/metalfloor003a")
+        kit.stringer(m, 3904, -226, 4384, -226, -384, -144, -384)
+        kit.stringer(m, 3872, 226, 4352, 226, -384, -384, -144)
 
     # ------------------------------------------------------------------ build
     def build(self):
@@ -245,8 +273,8 @@ class BlackIce:
         m, n = self.m, 0
         seen = []
         for op in self.L.ops:
-            if op.kind != "air" or op.style in ("skyroom",):
-                continue
+            if op.kind != "air" or op.style in ("skyroom",) or op.style.startswith("cy_"):
+                continue            # cyberspace places its own
             bx = op.box
             dx, dy, dz = bx.x1 - bx.x0, bx.y1 - bx.y0, bx.z1 - bx.z0
             if min(dx, dy) < 160 or dz < 96:
@@ -293,6 +321,9 @@ def pack_list(b):
         pairs.append((f.resolve().relative_to(stage.resolve()).as_posix(), f))
     for f in sorted(custom_art.MATDIR.glob("*.v[mt][tf]")):
         pairs.append((f"materials/blackice/{f.name}", f))
+    if assets.model_exists("models/blackice/kuroda_monument.mdl"):
+        import monument
+        pairs += monument.pack_pairs()
     return pairs
 
 

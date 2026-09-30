@@ -1,4 +1,4 @@
-# Session memory: dys_blackice (2026-09-28)
+# Session memory: dys_blackice (2026-09-28, playtest rounds 2026-09-29 and 2026-09-30)
 
 Notes from the Claude Code session that built **dys_blackice**. They are written for future sessions and
 contributors, so they cover what was verified, what went wrong, and why things are the way they are.
@@ -12,8 +12,8 @@ Paths are relative to the Dystopia install (`<Dystopia>/dystopia/...`).
   whose output was too basic to be playable.
 
 ## Outcome
-- `maps/dys_blackice.bsp` v1.0, about 23 MB, with everything packed inside. It is a rainy neon-city objective map:
-  metro, street market, plaza, tower lobby, server hall and core vault, plus a 5-node cyberspace.
+- `maps/dys_blackice.bsp` v1.2, about 29 MB, with everything packed inside. It is a rainy neon-city objective map:
+  metro, street market, plaza, tower lobby, server hall and core vault, plus one open cyberspace hall.
 - Three objectives: breach the gate, crack the security hub, crash the BLACK ICE core.
 - The generator in this folder is the single source of truth. See [README.md](README.md) to build it and
   [PLAN.md](PLAN.md) for the design and status.
@@ -33,6 +33,25 @@ Paths are relative to the Dystopia install (`<Dystopia>/dystopia/...`).
    - A clean-client test with loose files hidden, so content loads only from the pak.
    - Visual checks in both HDR and LDR.
 7. **Release.** Radar overview, mappaths, soundscapes, music, loading screen, LDR and HDR cubemaps, and a zip.
+8. **Playtest round 1 (2026-09-29, v1.1).** The user played the map and asked for five changes, all done:
+   - Remove the energy crystals and the rotating ceiling rings from cyberspace.
+   - Put each terminal in a small house whose door is the ICE.
+   - Replace the node-and-tunnel cyberspace with one big open room.
+   - Make the turrets destroyable with about 10 bolts each.
+   - Move the gate turrets away from the gate, because they shot anyone trying to breach it.
+9. **Playtest round 2 (2026-09-30, v1.2).** A longer play session with screenshots, all addressed:
+   - Lamps, pipes, monitors and signs that hung in mid-air or faced the wrong way. The validator now flags props
+     and thin panels with nothing behind them and glow sprites with nothing near them.
+   - All stairs were too steep (16u risers). Every flight is now 8u risers on 16u treads.
+   - The plaza was a sniper lane. Two annex buildings narrow it, and an ad tower, containers, columns,
+     balustrades, barricades and wrecks break the sight lines.
+   - Canopy turrets restored at the gate (cyberspace can only disable them). The lobby turrets could still hit
+     attackers through the gate lattice, so the closed gate got an invisible solid layer. Gate override 60 s.
+   - Cyberspace spawns: deckers now start in a pod high on the wall and float down a zero-gravity tube, like the
+     official maps. The tube exits carry static team ICE.
+   - Shop shutters recessed into the facades; a spawn exit freed from a staircase; metro tunnels that continue
+     behind forcefields; a readable station sign; forcefields set into their openings.
+   - A custom Kuroda monument model (Blender, scripted, compiled with studiomdl) replaces the brush obelisk.
 
 ## Verified Dystopia facts
 - **Brush-entity origin.** Brush entities need an `origin` keyvalue set to the bounds centre, as Hammer writes
@@ -56,6 +75,29 @@ Paths are relative to the Dystopia install (`<Dystopia>/dystopia/...`).
   - vbsp deletes a `prop_static` whose model lacks the static-prop flag.
   - It also deletes one whose model has a `prop_data` block without `allowstatic`. `kit.prop` falls back to
     `prop_dynamic_override` for these.
+- **Turrets spawn invulnerable.**
+  - A freshly spawned `npc_turret_ceiling` ignores all damage, even while deployed and firing, until it receives
+    `Enable`. `SetVincible` does not help. The map sends `Enable` from a `logic_auto` `OnMapSpawn`.
+  - After that, one boltgun bolt does 82 damage, so 800 hp takes 10 bolts. The bolt's zap adds nothing.
+  - A disabled or retracted turret takes no damage.
+  - A destroyed turret rebuilds after about 60 s (`respawntime` 0) and stays damageable.
+- **cyber_floor re-orients gravity.**
+  - Touching any face of a `cyber_floor` brush turns the decker's gravity toward that face (wall-walking). Bumping
+    the side of a raised `cyber_floor` block flipped a test decker onto a wall.
+  - Keep raised geometry as plain `func_detail`, which deckers walk on normally, unless wall-walking is intended.
+  - Deckers stop about 32u from walls, wider than the meatspace hull.
+- **Turrets and gates.** `npc_turret_ceiling` ignores `tools/toolsblock_los`: a lattice gate
+  (`metal/metalgate001a`, `%compilepassbullets`) lets turrets shoot straight through. Only a solid brush in the door
+  stops them, and it blocks bullets both ways.
+- **Zero-g tubes.** Two `cyber_gravity_volume` brushes, one at each end of a tube, switch gravity off inside it.
+  Their `angles` must point at the room that has gravity (verified: a decker hovers in the tube and lands on the
+  hall floor after the exit volume). A static `cyber_ice` (spawnflags 1) with a team lets only that team through.
+- **Entry cameras.** The jack-in terminal's screen shows the target `point_camera` upside down. Rolling the camera
+  180 degrees also rolls the arriving decker's view, so keep roll 0 and make the camera's view symmetric instead.
+- **Tube look.** Official maps build tubes from translucent brushes; dys_cybernetic uses
+  `twincannon/twin_cyberblue_trans` everywhere, which gives the smooth glowing-blue look.
+- **Circlet rings.** `cyspfinal/circlet*` are additive. On a small disc, world-aligned texture coordinates split
+  the ring into loose white arcs; fit the texture to the disc. Official maps stack them as static halos.
 - **Lighting.** Interiors look right with quadratic lights (brightness in the hundreds). Short
   `_fifty/_zero_percent_distance` falloffs left rooms dark. Tile materials with `$envmap` look washed out until
   cubemaps are built, so judge the lighting only after `buildcubemaps`.
@@ -74,6 +116,17 @@ Paths are relative to the Dystopia install (`<Dystopia>/dystopia/...`).
     `kill`, then stand at the terminal and `+use`. Success shows as `execing cyberspace.cfg` in the console log.
 - **Cubemaps.** `buildcubemaps` is finished when the engine rewrites the BSP; watch its modification time.
   Build LDR and HDR by switching `mat_hdr_level`, then restore it.
+- **Weapon tests in multiplayer.**
+  - `god`, `buddha` and `notarget` do nothing in multiplayer.
+  - To survive, give the test player health with `ent_fire player addoutput "health 90000"`.
+  - Turret bullets knock the player away. `sv_friction 1000` holds the player in place.
+  - A damage filter on the player makes turrets stop engaging, which also stops them taking damage.
+  - Send `setpos`/`setang` and `+attack` in separate cfgs. In one cfg the shot can fire before the teleport.
+  - `setweapon 3` picks the boltgun for the light class (1 shotgun, 2 laser rifle). `givecurrentammo` refills.
+  - `ent_dump <name>` prints each entity's health to the console log.
+- **Hiding loose files for the clean-client test.** Give every hidden folder a unique name. Several custom
+  folders are called `blackice`; hiding them by folder name alone overwrote one with the next and lost the
+  files. They were restored byte-exact from the BSP pak. `release.hide_loose` now keys by relative path.
 - **Never change archived cvars in automated runs.** In Dystopia `r_drawviewmodel` is archived, unlike stock
   Source. The game saves `config.cfg` on quit and syncs it to Steam Cloud, so restoring the local file is not
   enough; the tester lost their gun viewmodel this way. `GameSession.close()` now sets the viewmodel back on.
@@ -86,12 +139,21 @@ Paths are relative to the Dystopia install (`<Dystopia>/dystopia/...`).
 - **Two ways through each objective.**
   - Gate: a meatspace override or a cyberspace hack.
   - Core shield: a temporary drop from cyberspace or a permanent drop by destroying the emitters.
+- **Cyberspace is one open hall.** A red core terrace with ramps, cover blocks, black pillars, three wall pods
+  with zero-g tubes down to landing pads, and five terminal houses. Each house's doorway is its ICE, and the screen hangs on the back
+  wall facing the door. Floating node icons (`vaccinert/dys_*node`) label the houses.
+- **Gate turrets on the canopy.** Two turrets hang under the canopy in front of the gate; cyberspace can only
+  disable or enable them (no capture). A solid, invisible layer in the closed gate keeps the lobby turrets from
+  shooting through it; it lifts with the gate.
+- **Stairs are 1:2.** 8u risers on 16u treads (about 27 degrees) with a player-clip ramp over the steps.
 - **Custom art is generated.** The Kuroda logos, window facade, BLACK ICE warning, overview and loading screen
   are all made by scripts (Pillow and vtex), so they can be rebuilt from the repo alone.
 
 ## Known limitations / next steps
-- **Playtesting.** The map has not been played by real players yet. Timings and health values are first-pass:
-  10 s override, 8 s crack, 40 s shield drop, core 2600 hp, emitters 900 hp, turrets 800 hp.
+- **Playtesting.** One solo playtest so far, no full match. Timings and health values are first-pass:
+  60 s override, 8 s crack, 40 s shield drop, core 2600 hp, emitters 900 hp, turrets 800 hp (10 bolts).
+- **Gate objective marker.** The IFF box is drawn around the gate itself, which invites shooting it. The breach
+  actually happens at the override screen in the north guard post or in cyberspace.
 - **Round time** comes from the server default.
 - **Loading screen.** It is packed in the BSP, but the engine may read it before the pak is mounted. Official
   maps ship it loose.

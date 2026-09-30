@@ -13,6 +13,13 @@ from vmflib import (VMF, Tex, box, hull, ngon, wedge, NODRAW, TRIGGER, INVISIBLE
 
 FACING = {"+x": (1, 0, 0), "-x": (-1, 0, 0), "+y": (0, 1, 0), "-y": (0, -1, 0)}
 FACE_KEY = {"+x": "east", "-x": "west", "+y": "north", "-y": "south"}
+YAW = {"+x": 0, "+y": 90, "-x": 180, "-y": 270}
+
+NICHE = 24          # depth of the shop-door niches cut into the market facades
+# roller shutters: centre x, facade y, facing, width, material (blackice.shell cuts the niches)
+SHUTTERS = [(-2816, 320, "-y", 128, "metal/metaldoor032a"), (-2560, 320, "-y", 128, "urban/oldgarage"),
+            (-3392, -320, "+y", 96, "metal/metaldoor032a"), (-2432, -320, "+y", 128, "detonate/detrollerdoor02"),
+            (-2176, -320, "+y", 128, "metal/metaldoor032a")]
 
 
 def fit_tex(mat, facing, left_pt, top_z, w, h, lm=16):
@@ -64,13 +71,15 @@ def blade(m: VMF, x, y, z0, z1, out_dir, w, mat, color, bright=50):
         t_n = fit_tex(mat, "+y", (cx + w / 2, 0), z1, w, z1 - z0)
         t_s = fit_tex(mat, "-y", (cx - w / 2, 0), z1, w, z1 - z0)
         s = box(cx - w / 2, y - 2, z0, cx + w / 2, y + 2, z1, {"all": NODRAW, "north": t_n, "south": t_s})
-        arm = box(x, y - 2, z1 - 4, cx + o[0] * w / 2, y + 2, z1, "metal/metalwall003a")
+        arm = [box(min(x, cx + o[0] * w / 2), y - 2, zz, max(x, cx + o[0] * w / 2), y + 2, zz + 4, "metal/metalwall003a")
+               for zz in (z1 - 4, z0)]
     else:
         cy = y + o[1] * (w / 2 + 8)
         t_e = fit_tex(mat, "+x", (0, cy - w / 2), z1, w, z1 - z0)
         t_w = fit_tex(mat, "-x", (0, cy + w / 2), z1, w, z1 - z0)
         s = box(x - 2, cy - w / 2, z0, x + 2, cy + w / 2, z1, {"all": NODRAW, "east": t_e, "west": t_w})
-        arm = box(x - 2, y, z1 - 4, x + 2, cy + o[1] * w / 2, z1, "metal/metalwall003a")
+        arm = [box(x - 2, min(y, cy + o[1] * w / 2), zz, x + 2, max(y, cy + o[1] * w / 2), zz + 4, "metal/metalwall003a")
+               for zz in (z1 - 4, z0)]
     m.brush_ent("func_brush", s, Solidity="1", solidbsp="0", StartDisabled="0", disableshadows="1",
                 vrad_brush_cast_shadows="0", spawnflags="2", InputFilter="0")
     m.detail(arm)
@@ -78,8 +87,23 @@ def blade(m: VMF, x, y, z0, z1, out_dir, w, mat, color, bright=50):
     kit.light(m, (bx + bx1) / 2, (by + by1) / 2, (z0 + z1) / 2, color=color, bright=bright, fifty=70, hundred=260)
 
 
-def shutter(m: VMF, cx, cy, z0, z1, facing, w, mat="metal/metaldoor032a"):
-    panel(m, cx, cy, z0, z1, facing, w, mat, depth=4, back="metal/metalwall003a")
+def shutter(m: VMF, cx, fy, facing, w, mat="metal/metaldoor032a"):
+    """Roller shutter at the back of its facade niche (fy = facade plane), sill level with the sidewalk."""
+    f = FACING[facing]
+    back = fy - f[1] * NICHE
+    panel(m, cx, back, 8, 152, facing, w, mat, depth=2, back="metal/metalwall003a")
+    m.detail(box(cx - w / 2 - 8, min(fy, back), 0, cx + w / 2 + 8, max(fy, back), 8,
+                 {"all": "concrete/concretewall008a", "top": "urban/sidewalk"}))
+
+
+def wall_lamp(m: VMF, x, y, z, facing, color, bright=220, glow=0.25):
+    """Caged wall lamp on the wall point (x, y), bulb just below z, shining toward `facing`; light + glow."""
+    f = FACING[facing]
+    kit.prop(m, "models/props_c17/light_cagelight01_on.mdl", x + f[0], y + f[1], z, yaw=YAW[facing], solid=0,
+             on_floor=False)
+    kit.light(m, x + f[0] * 24, y + f[1] * 24, z - 8, color=color, bright=bright)
+    if glow:
+        kit.sprite(m, x + f[0] * 5, y + f[1] * 5, z - 5, color=color, scale=glow, alpha=140)
 
 
 def sidewalk(m: VMF, x0, x1, y0, y1, h=8, top="urban/sidewalk", curb="concrete/concretewall008a", curb_side=None):
@@ -160,18 +184,15 @@ def street(b):
     # --- north side shop fronts (facade at y=320 faces -y)
     neon(m, -3136, 316, 236, 292, "-y", 384, "neon/neon_thdsm", (255, 70, 90), bright=70)            # noodle bar
     neon(m, -2688, 316, 150, 246, "-y", 96, "neon/s_neon1", (255, 50, 50), bright=60)                 # pawn shop
-    shutter(m, -2816, 316, 0, 144, "-y", 128)
-    shutter(m, -2560, 316, 0, 144, "-y", 128, "urban/oldgarage")
     neon(m, -2048, 316, 176, 240, "-y", 256, "signs/sign_netexcess02", (120, 160, 255), bright=70)     # arcade
     neon(m, -1760, 316, 150, 246, "-y", 96, "neon/s_neon_netexcess", (255, 60, 70), bright=50)
     blade(m, -2656, 320, 360, 872, "-y", 128, "props/sign_hotel01a", (255, 200, 150), bright=90)        # HOTEL
     # --- south side (facade at y=-320 faces +y)
     neon(m, -3264, -316, 150, 246, "+y", 96, "neon/s_neon2", (60, 220, 255), bright=60)               # liquor
-    shutter(m, -3392, -316, 0, 144, "+y", 96)
     neon(m, -2816, -316, 236, 300, "+y", 256, "neon/neon_datasmith", (255, 90, 200), bright=70)       # electronics
     neon(m, -2304, -316, 150, 246, "+y", 96, "neon/s_neon_diner", (80, 220, 255), bright=60)          # diner
-    shutter(m, -2432, -316, 0, 144, "+y", 128, "detonate/detrollerdoor02")
-    shutter(m, -2176, -316, 0, 144, "+y", 128)
+    for spec in SHUTTERS:
+        shutter(m, *spec)
     neon(m, -1856, -316, 150, 246, "+y", 96, "neon/s_neon3", (255, 150, 40), bright=60)               # SoyKaf
     neon(m, -1856, -316, 290, 354, "+y", 128, "neon/dog_neon17", (90, 200, 255), bright=40, sprite=False)
     blade(m, -2240, -320, 420, 932, "+y", 128, "signs/osaka_sign01", (255, 90, 220), bright=90)
@@ -209,15 +230,11 @@ def street(b):
           StartSize="18", EndSize="60", Rate="14", rendercolor="170 180 200", JetLength="160", renderamt="120",
           rollspeed="6", spawnflags="0")
 
-    # --- alleys: dumpsters, trash, a light each
-    for (x, y, yaw) in [(-3600, 1090, 0), (-2400, 1150, 180), (-3200, -1090, 0), (-2000, -1150, 180)]:
+    # --- alleys: dumpsters and trash (lamps are in dress_polish.alleys)
+    for (x, y, yaw) in [(-3600, 1090, 0), (-2080, 1150, 180), (-3200, -1090, 0), (-2000, -1150, 180)]:
         kit.prop(m, "models/props_junk/trashdumpster02.mdl", x, y, 0, yaw=yaw, solid=6)
-    for (x, y) in [(-3000, 1120), (-2600, -1120)]:
+    for (x, y) in [(-3300, 1150), (-2600, -1120)]:
         kit.prop(m, "models/props_junk/garbage256_composite002a.mdl", x, y, 0, yaw=90, solid=0)
-    for (x, y, c) in [(-3500, 1120, (255, 120, 60)), (-2600, 1120, (80, 160, 255)), (-3300, -1120, (255, 80, 160)),
-                      (-2200, -1120, (255, 170, 80))]:
-        kit.light(m, x, y, 180, color=c, bright=60, fifty=120, hundred=420)
-        kit.prop(m, "models/props_c17/light_cagelight01_on.mdl", x, y + (60 if y > 0 else -60) * 0, 200, solid=0, on_floor=False)
 
     # --- rain over the market
     rain(m, -3456, -320, 0, -1664, 320, 1100)
@@ -228,37 +245,67 @@ def street(b):
 def plaza(b):
     m: VMF = b.m
     rng = random.Random(11)
-    # --- planters with trees (cover), concrete sides
+    # --- planters with a tree and shrubs (cover), concrete sides
     for (cx, cy) in [(-1280, -704), (-1280, 704), (-256, -832), (-256, 832)]:
         m.detail(box(cx - 128, cy - 96, 0, cx + 128, cy + 96, 48,
                      {"all": "concrete/concretewall060c", "top": "nature/dirtfloor006a"}))
         kit.prop(m, "models/props_foliage/tree_deciduous_03b.mdl", cx, cy, 48, yaw=rng.randint(0, 359), solid=6,
                  fade=(3000, 4000))
-    # --- central monument in the sunken court: black obelisk + light strips + rotating ring
+        for dx in (-84, 84):
+            kit.prop(m, "models/props_foliage/shrub_01a.mdl", cx + dx, cy, 48, yaw=rng.randint(0, 359), solid=0,
+                     fade=(2600, 3400))
+    # --- central monument in the sunken court: the Kuroda monument model (monument/), or a plain obelisk
+    # when the model hasn't been built
     ox, oy = -512, 0
-    m.detail(box(ox - 48, oy - 48, -64, ox + 48, oy + 48, 320, {"all": "vaccinert/dys_vacextwall4", "top": "metal/metalwall003a"}))
-    for (sx, sy, fac) in [(ox + 49, oy, "+x"), (ox - 49, oy, "-x")]:
-        panel(m, sx, sy, -40, 300, fac, 12, "vaccinert/dys_vactrim3light", depth=1)
-    ring = [box(ox - 132, oy - 132, 360, ox + 132, oy - 120, 372, "vaccinert/dys_vactrim3light"),
-            box(ox - 132, oy + 120, 360, ox + 132, oy + 132, 372, "vaccinert/dys_vactrim3light"),
-            box(ox - 132, oy - 120, 360, ox - 120, oy + 120, 372, "vaccinert/dys_vactrim3light"),
-            box(ox + 120, oy - 120, 360, ox + 132, oy + 120, 372, "vaccinert/dys_vactrim3light")]
-    m.brush_ent("func_rotating", ring, targetname="monument_ring", origin=(ox, oy, 366), maxspeed="18",
-                fanfriction="20", spawnflags="1", solidbsp="0", volume="0", dmg="0", rendercolor="255 255 255")
-    kit.light(m, ox, oy, 380, color=(90, 220, 255), bright=120, fifty=180, hundred=700)
-    kit.light(m, ox + 120, oy, 40, color=(90, 220, 255), bright=40, fifty=60, hundred=240)
-    kit.light(m, ox - 120, oy, 40, color=(90, 220, 255), bright=40, fifty=60, hundred=240)
-    # --- concrete barriers as cover near the gate
-    for (x, y, yaw) in [(96, -336, 0), (96, 336, 0), (64, 0, 90), (-60, -560, 60), (-60, 560, 120)]:
+    if assets.model_exists("models/blackice/kuroda_monument.mdl"):
+        import monument
+        monument.place(m, ox, oy, -64)
+    else:
+        m.detail(box(ox - 48, oy - 48, -64, ox + 48, oy + 48, 320,
+                     {"all": "vaccinert/dys_vacextwall4", "top": "metal/metalwall003a"}))
+        kit.light(m, ox, oy, 380, color=(90, 220, 255), bright=120, fifty=180, hundred=700)
+    # low balustrades along the court's long edges (crouch cover)
+    for y0 in (448, -464):
+        m.detail(box(-896, y0, 0, -128, y0 + 16, 36, {"all": "concrete/concretewall060c", "top": "metal/metalwall003a"}))
+    # --- sight-line breakers, so the approach is no sniper lane
+    # ad tower at the mouth of the market street: hides the gate from the whole street
+    tx = -1376
+    m.detail(box(tx - 96, -128, 0, tx + 96, 128, 256, {"all": "vaccinert/dys_vacextwall4", "top": "metal/metalwall003a"}))
+    panel(m, tx - 96, 0, 96, 208, "-x", 224, "adverts/adverts_kitty", depth=1)
+    panel(m, tx + 96, 0, 96, 208, "+x", 224, "adverts/adverts_kitty", depth=1)
+    for y in (-128, 128):
+        panel(m, tx, y, 16, 240, "+y" if y > 0 else "-y", 60, "adverts/adverts_aphrodite", depth=1)
+    m.detail(box(tx - 8, -224, 256, tx + 8, 224, 480, "metal/metalwall003a"))
+    panel(m, tx - 8, 0, 256, 480, "-x", 448, "detonate/billboard4", depth=1)
+    panel(m, tx + 8, 0, 256, 480, "+x", 448, "detonate/billboard5", depth=1)
+    for y in (-160, 160):
+        kit.spot(m, tx - 120, y, 250, pitch=-35, yaw=0, color=(255, 230, 200), bright=260, inner=30, outer=55)
+    # shipping containers (two stacked on the north side) block the diagonals toward the guard posts
+    for (x, y, z) in [(-900, 560, 0), (-900, 560, 129), (-900, -560, 0)]:
+        kit.prop(m, "models/props_wasteland/cargo_container01.mdl", x, y, z, yaw=90, solid=6, fade=(5000, 6000))
+    # data columns between the court and the annexes
+    for y in (-672, 672):
+        m.detail(ngon(-480, y, 40, 12, 0, 256, {"all": "vaccinert/dys_vacextwall4"}))
+        m.detail(ngon(-480, y, 42, 12, 200, 216, {"all": "vaccinert/dys_vactrim3light"}))
+    # concrete barricades flanking the gate approach
+    for y0 in (200, -360):
+        m.detail(box(-16, y0, 0, 16, y0 + 160, 64, {"all": "concrete/concretewall060c", "top": "metal/metalwall003a"}))
+    for (x, y, yaw) in [(96, -336, 0), (96, 336, 0), (64, 0, 90)]:
         kit.prop(m, "models/props_c17/concrete_barrier001a.mdl", x, y, 0, yaw=yaw, solid=6)
-    # wrecked transport on the south side (big cover piece)
-    kit.prop(m, "models/props/brute_destroyed.mdl", -1024, -1000, 0, yaw=20, solid=6, fade=(3500, 4500))
-    kit.prop(m, "models/props_vehicles/van001a.mdl", -960, 980, 0, yaw=-8, solid=6, fade=(3500, 4500))
+    # wrecks as big cover in front of the guard posts
+    kit.prop(m, "models/props/brute_destroyed.mdl", -160, -600, 0, yaw=90, solid=6, fade=(3500, 4500))
+    kit.prop(m, "models/props_vehicles/van001a.mdl", -150, 606, 0, yaw=95, solid=6, fade=(3500, 4500))
+    # double-sided billboard on the rooftop's plaza edge: blocks the roof's view toward the gate; the gap at its
+    # north end is a drop into the plaza corner, where the annex hides the gate
+    m.detail(box(-1680, 704, 320, -1664, 960, 536, "metal/metalwall003a"))
+    panel(m, -1664, 832, 368, 496, "+x", 256, "twincannon/billboard_science_adf", depth=1)
+    panel(m, -1680, 832, 368, 496, "-x", 256, "twincannon/billboard_science_mcl", depth=1)
     # --- tower facade: vertical light pilasters + floodlights toward the plaza
-    for y in (-960, -704, 704, 960):
-        panel(m, 450, y, 32, 1200, "-x", 16, "vaccinert/dys_vactrim5light", depth=2)
+    for y in (-960, -704, 704, 960):       # on the entrance storey, then on the setback facade above
+        panel(m, 448, y, 32, 472, "-x", 16, "vaccinert/dys_vactrim5light", depth=2)
+        panel(m, 576, y, 488, 1200, "-x", 16, "vaccinert/dys_vactrim5light", depth=2)
     for y in (-1024, -512, 512, 1024):
-        kit.spot(m, 430, y, 600, pitch=35, yaw=180, color=(200, 220, 255), bright=500, inner=25, outer=45)
+        kit.spot(m, 430, y, 600, pitch=-35, yaw=180, color=(200, 220, 255), bright=500, inner=25, outer=45)   # vrad: pitch > 0 = up
     # KURODA banner over the entrance + wide logos on the setback ledge
     neon(m, 574, 0, 320, 1216, "-x", 224, "blackice/kuroda_banner", (255, 60, 70), bright=180, reach=640)
     m.detail(box(448, -1216, 472, 576, 1216, 480, {"all": "vaccinert/dys_vactrim2", "top": "metal/metalfloor_001e"}))
@@ -271,6 +318,6 @@ def plaza(b):
         kit.glass(m, 192, gy * 398 if gy > 0 else -402, 72, 384, gy * 402 if gy > 0 else -398, 144, breakable=True)
         kit.light(m, 288, gy * 576, 170, color=(200, 225, 255), bright=110, fifty=90, hundred=320)
     # lamps along the plaza edges
-    for (x, y, d) in [(-1536, -1120, "+y"), (-512, -1120, "+y"), (-1536, 1120, "-y"), (-512, 1120, "-y")]:
+    for (x, y, d) in [(-1536, -1120, "+y"), (-896, -880, "+y"), (-1536, 1120, "-y"), (-896, 880, "-y")]:
         lamppost(m, x, y, d, color=(200, 220, 255), bright=320)
     rain(m, -1664, -1216, 0, 448, 1216, 1100, density=35)

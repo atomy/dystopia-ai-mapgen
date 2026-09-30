@@ -44,6 +44,22 @@ def stairs(m: VMF, x0, y0, z0, x1, y1, z1, rise: str, step=16, mat="concrete/con
     return n
 
 
+def stringer(m: VMF, x0, y0, x1, y1, zb, z0, z1, h=40, t=4, mat="metal/metalwall003a", clip=64):
+    """Solid side wall of a flight along an axis-aligned line (x0,y0)->(x1,y1): from the floor zb up to the
+    stair line (z0 at the start, z1 at the end) plus h, with a sloped player clip on top."""
+    if y0 == y1:
+        a, b = (x0, y0 - t / 2), (x0, y0 + t / 2)
+        c, d = (x1, y0 - t / 2), (x1, y0 + t / 2)
+    else:
+        a, b = (x0 - t / 2, y0), (x0 + t / 2, y0)
+        c, d = (x0 - t / 2, y1), (x0 + t / 2, y1)
+    pts = [(*a, zb), (*b, zb), (*c, zb), (*d, zb), (*a, z0 + h), (*b, z0 + h), (*c, z1 + h), (*d, z1 + h)]
+    m.detail(hull(pts, mat))
+    if clip:
+        m.add(hull([(*a, z0 + h), (*b, z0 + h), (*c, z1 + h), (*d, z1 + h),
+                    (*a, z0 + h + clip), (*b, z0 + h + clip), (*c, z1 + h + clip), (*d, z1 + h + clip)], PLAYERCLIP))
+
+
 def filter_team(m: VMF, name, team):
     return m.ent("filter_activator_team", (0, 0, 0), targetname=name, filterteam=str(team), Negated="0")
 

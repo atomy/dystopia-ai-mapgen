@@ -69,24 +69,57 @@ The user also gave some guidance during the session:
 - **Verification:** automated in-game sessions driven through `-hijack`, including screenshot tours, walk tests on every stair and route, an objective-chain regression, a cyberspace jack-in test, and a load with only the packed content (loose files hidden).
 
 **Result:** `maps/dys_blackice.bsp` v1.0 (23 MB, all content packed inside):
-- **Map:** rainy neon megacity at night. Metro station, then a street market, then a corporate plaza, a tower lobby, a server hall and a core vault, plus a 5-node cyberspace.
+- **Map:** rainy neon megacity at night. Metro station, then a street market, then a corporate plaza, a tower lobby, a server hall and a core vault, plus a cyberspace (5 nodes in v1.0, one open hall with zero-g entry tubes since v1.1/v1.2).
 - **Objectives:** three in sequence. Breach the gate (meatspace override or cyberspace hack), crack the security hub, then crash the BLACK ICE core (shield dropped from cyberspace or by destroying its emitters).
 - **Gameplay systems:** 4 spawn areas that flip as objectives fall, 7 jack-in points, ICE-guarded terminals, turrets and team forcefields.
 - **Release extras:** radar overview, objective guide paths, custom soundscapes, music and a loading screen.
 - **Release package:** `dys_blackice_v1.0.zip` (BSP + readme), built locally into `dys_blackice/build/release/` by `release.py zip`.
 
+**Playtest follow-up (v1.1):** the user then played the map and reported:
+- The energy crystals and rotating ceiling rings in cyberspace looked wrong.
+- The ICE should be the door of small terminal houses.
+- The long cyberspace tunnels felt untypical; they wanted one big open room.
+- The turrets could not be destroyed.
+- The gate turrets covered anyone trying to breach the gate.
+
+In the same session the model rebuilt cyberspace as one open hall with ICE-door houses. It found by in-game
+testing that a freshly spawned `npc_turret_ceiling` ignores all damage until it receives `Enable`. The turrets
+now take 10 boltgun bolts each, and the gate turrets moved inside the lobby behind the gate.
+
+**Second playtest (v1.2):** a longer session with about 20 screenshot notes. The feedback included:
+- things hanging in mid-air
+- stairs too steep
+- a plaza that was "laser-rifle heaven"
+- turrets hitting attackers through the gate
+- shutters sticking out of the walls
+- a spawn exit blocked by stairs
+- a dead-end subway tunnel
+- deckers spawning straight into the main cyberspace room
+
+The model fixed all of them:
+- A validator now flags floating props, panels and glow sprites.
+- Every flight is re-cut at 1:2.
+- Annexes and cover narrow the plaza.
+- A solid layer in the closed gate blocks the lobby turrets.
+- Deckers now float down zero-g tubes behind team ICE.
+- A sub-agent modelled a Kuroda monument in Blender for the plaza.
+
+The screenshots below show v1.2.
+
 | | |
 |---|---|
 | ![street](dys_blackice/street.jpg) | ![plaza](dys_blackice/plaza.jpg) |
-| Market street and the Kuroda tower | Kuroda Plaza (tower continues into the 3D skybox) |
-| ![gate](dys_blackice/gate.jpg) | ![lobby](dys_blackice/lobby.jpg) |
-| Obj 1: security gate and guard posts | Tower lobby mezzanine |
-| ![server hall](dys_blackice/server_hall.jpg) | ![core vault](dys_blackice/core_vault.jpg) |
-| Server hall | Obj 3: BLACK ICE core vault |
-| ![cyberspace](dys_blackice/cyberspace.jpg) | ![metro](dys_blackice/metro.jpg) |
-| Cyberspace entry node | Punk HQ: abandoned metro station |
-| ![arcade](dys_blackice/arcade.jpg) | ![alley](dys_blackice/alley.jpg) |
-| NetExcess Arcade (forward Punk spawn) | North alley fire escape (rooftop flank) |
+| Market street, ending at the plaza's ad tower | Kuroda Plaza with the Kuroda monument |
+| ![monument](dys_blackice/monument.jpg) | ![gate](dys_blackice/gate.jpg) |
+| Kuroda monument (Blender model by a sub-agent) | Obj 1: security gate, canopy turrets and guard posts |
+| ![lobby](dys_blackice/lobby.jpg) | ![server hall](dys_blackice/server_hall.jpg) |
+| Tower lobby mezzanine | Server hall |
+| ![core vault](dys_blackice/core_vault.jpg) | ![cyberspace](dys_blackice/cyberspace.jpg) |
+| Obj 3: BLACK ICE core vault | Cyberspace hall with zero-g entry tubes |
+| ![metro](dys_blackice/metro.jpg) | ![arcade](dys_blackice/arcade.jpg) |
+| Punk HQ: abandoned metro station | NetExcess Arcade (forward Punk spawn) |
+| ![alley](dys_blackice/alley.jpg) | |
+| North alley (flank) | |
 
 Loading screen:
 

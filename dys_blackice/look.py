@@ -52,6 +52,11 @@ AIR = {
                         walls=[(0, None, band("dys_nameless/concrete_004_blue"))]),
     "maint": dict(floor=T("metal/metalfloor_001e"), ceil=T("concrete/concreteceiling004a"),
                   walls=[(0, None, band("dys_fortress/tunnel_wall"))]),
+    "metro_tunnel": dict(floor=T("nature/gravelfloor002b", rot=90), ceil=T("concrete/concreteceiling004a"),
+                         walls=[(0, None, band("dys_fortress/tunnel_wall", scale=0.25))]),
+    # recessed shop-door niches in the market facades
+    "niche": dict(floor=T("urban/sidewalk"), ceil=T("metal/metalwall003a"),
+                  walls=[(0, None, flat("metal/metalwall003a"))]),
     # --- market interiors
     "shop": dict(floor=T("tile/tilefloor020a"), ceil=T("props/acousticceiling002a"),
                  walls=[(0, 96, band("urban/old_cement4")), (96, None, band("brick/brickwall017b"))]),
@@ -79,19 +84,9 @@ AIR = {
     "plaza": dict(floor=T("dys_nameless/concrete_floor_001", lm=32), outdoor=True),
     "court": dict(floor=T("stone/stonefloor011a", lm=32), outdoor=True),
     "roof": dict(floor=T("dys_fortress/gravel", lm=64), outdoor=True),
-    # --- cyberspace (opaque shell; glowing layers are entities)
-    "cy_green": dict(floor=T("cyberspace/wall_squaresolid"), ceil=T("cyberspace/cube_green"),
-                     walls=[(0, None, flat("cyberspace/cube_green"))]),
-    "cy_yellow": dict(floor=T("cyberspace/wall_squaresolid"), ceil=T("cyberspace/cube_yellow"),
-                      walls=[(0, None, flat("cyberspace/cube_yellow"))]),
-    "cy_red": dict(floor=T("cyberspace/wall_squaresolid"), ceil=T("cyberspace/cube_red"),
-                   walls=[(0, None, flat("cyberspace/cube_red"))]),
-    "cy_purple": dict(floor=T("cyberspace/wall_squaresolid"), ceil=T("cyberspace/cube_purple"),
-                      walls=[(0, None, flat("cyberspace/cube_purple"))]),
-    "cy_black": dict(floor=T("cyberspace/wall_squaresolid"), ceil=T("cyberspace/t_cyspwall1_black"),
-                     walls=[(0, 96, flat("cyberspace/cube_red")), (96, None, flat("cyberspace/t_cyspwall1_black"))]),
-    "cy_tube": dict(floor=T("cyberspace/wall_squaresolid"), ceil=T("cyberspace/t_cyspwall1_black"),
-                    walls=[(0, None, flat("cyberspace/t_cyspwall1_black"))]),
+    # --- cyberspace hall (opaque shell; glowing layers are entities)
+    "cy_hall": dict(floor=T("cyberspace/wall_squaresolid"), ceil=T("cyberspace/t_cyspwall1_black", scale=0.5),
+                    walls=[(0, None, flat("cyberspace/cube_purple", scale=0.5))]),
 }
 
 # ----------------------------------------------------------------------------- facades

@@ -10,7 +10,8 @@ corp's lethal AI firewall, whose physical core sits in a datavault under the tow
 Flow (meatspace):
 1. Punk HQ: abandoned metro station (underground). Punk jackpoint lives here.
 2. Neon market street: shopfronts, stalls, steam, cables, fire-escape flank.
-3. Kuroda Plaza: open approach, cover, skybridge, guard posts, turrets.
+3. Kuroda Plaza: open approach, cover, skybridge, guard posts. The gate turrets hang inside the
+   lobby behind the gate, so they only cover the entrance once it is breached.
    **Obj 1: breach the security gate.** Done either from the guard-post screen (meatspace)
    or from the Gate Control terminal in cyberspace (password ICE). Unlocks a forward spawn.
 4. Tower lobby / atrium: two floors, mezzanine, stairs, reception. Corps start spawn is here.
@@ -21,9 +22,11 @@ Flow (meatspace):
    **Obj 3 (final): crash the core.** Drop the shield in cyberspace (encrypted ICE), then shoot
    the core (a func_breakable that feeds the objective's health bar).
 
-Cyberspace: a compact, separate region (entry node, gate node, security node, core node).
-It uses tubes with gravity volumes, jump and speed pads, energy crystals, and cyber_ice-guarded
-dys_cyberscreens that drive meatspace doors, turrets and objectives.
+Cyberspace: one open hall (3584 x 2560 x 1024) in a separate sealed region. Deckers jack in to pods
+high on the walls (Punk west, neutral south, Corp east) and float down zero-g tubes into the hall; the
+Punk and Corp tube exits carry static team ICE. The hall has a red core terrace with ramps, cover
+blocks and pillars, and five terminal houses. Each house's doorway is filled by its cyber_ice, and the dys_cyberscreen inside
+drives meatspace doors, turrets or objectives.
 
 ## Dystopia systems (learned from official VMF sources)
 - dys_spawn (team, spawnid, spawnname) + dys_spawn_point; captured with SetPunks/SetCorps.
@@ -59,6 +62,15 @@ dys_cyberscreens that drive meatspace doors, turrets and objectives.
       music, loading screen - all packed in the BSP
 - [x] 8 Final: cubemaps LDR+HDR, clean-client test (pak-only), logic regression (6/6 pass),
       beauty shots, loading screen, release zip (build/release/)
+- [x] 9 Playtest round 1 (2026-09-29, v1.1): cyberspace rebuilt as one open hall with ICE-door
+      terminal houses (energy crystals, rotating ceiling rings and tubes removed); turrets made
+      destroyable (they spawn invulnerable until Enable; now 800 hp = 10 bolts); gate turrets moved
+      behind the gate
+- [x] 10 Playtest round 2 (2026-09-30, v1.2): canopy gate turrets restored (disable-only from cyberspace)
+      and the closed gate blocks the lobby turrets; 60 s override; all stairs re-cut at 1:2; plaza
+      narrowed with annexes and cover; zero-g cyber tubes from wall pods with team ICE; recessed
+      shutters, wall-mounted lamps and pipes, working shop monitors; metro tunnels behind forcefields;
+      Kuroda monument model (Blender -> studiomdl) in the court; floating-prop/panel validator
 
 ## Rebuild
     python blackice.py --compile --final      # generate + validate + compile + pack
